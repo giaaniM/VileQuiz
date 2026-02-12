@@ -2,20 +2,31 @@ import { useState, useEffect, useRef } from 'react';
 
 /**
  * ScaledContainer - Wraps content and scales it down to fit the viewport.
- * Designed for a reference resolution of 1024x768.
- * On smaller viewports (e.g., TV at 1024x600), it scales the entire UI proportionally.
- * On larger viewports, it does NOT scale up (max scale = 1).
+ * On small viewports (e.g., TV at 1024x600), the entire UI is scaled down proportionally.
+ * On normal/large viewports, no scaling is applied.
+ *
+ * Key: children should use `h-full` instead of `h-screen` to fill this container.
  */
 function ScaledContainer({ children, referenceHeight = 768 }) {
     const [scale, setScale] = useState(1);
-    const containerRef = useRef(null);
+    const [dimensions, setDimensions] = useState({ w: '100vw', h: '100vh' });
 
     useEffect(() => {
         const updateScale = () => {
             const vh = window.innerHeight;
-            // Only scale DOWN, never up
+            const vw = window.innerWidth;
             const newScale = Math.min(1, vh / referenceHeight);
             setScale(newScale);
+
+            if (newScale < 1) {
+                // Inner div must be larger so that when scaled, it fills the viewport
+                setDimensions({
+                    w: `${vw / newScale}px`,
+                    h: `${vh / newScale}px`
+                });
+            } else {
+                setDimensions({ w: '100vw', h: '100vh' });
+            }
         };
 
         updateScale();
@@ -24,19 +35,11 @@ function ScaledContainer({ children, referenceHeight = 768 }) {
     }, [referenceHeight]);
 
     return (
-        <div
-            ref={containerRef}
-            style={{
-                width: '100vw',
-                height: '100vh',
-                overflow: 'hidden',
-                position: 'relative',
-            }}
-        >
+        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
             <div
                 style={{
-                    width: scale < 1 ? `${100 / scale}%` : '100%',
-                    height: scale < 1 ? `${100 / scale}%` : '100%',
+                    width: dimensions.w,
+                    height: dimensions.h,
                     transform: scale < 1 ? `scale(${scale})` : 'none',
                     transformOrigin: 'top left',
                 }}

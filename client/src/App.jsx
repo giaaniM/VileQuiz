@@ -5,10 +5,11 @@ import Lobby from './pages/Lobby';
 import Join from './pages/Join';
 import GameRoom from './pages/GameRoom';
 import PlayerController from './pages/PlayerController';
+import ScaledContainer from './components/ScaledContainer';
 
 function Home() {
   return (
-    <div className="min-h-screen bg-primary flex flex-col">
+    <div className="min-h-full bg-primary flex flex-col">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-primary-light border-b border-white/5">
         <span className="text-duo-green font-nunito font-black text-2xl tracking-tight">VileQuiz</span>
@@ -64,15 +65,17 @@ function Home() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/host" element={<CategorySelection />} />
-        <Route path="/host/lobby" element={<Lobby />} />
-        <Route path="/host/game/:pin" element={<GameRoom />} />
-        <Route path="/play" element={<Join />} />
-        <Route path="/join" element={<Join />} />
-        <Route path="/play/game/:pin" element={<PlayerController />} />
-      </Routes>
+      <ScaledContainer referenceHeight={768}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/host" element={<CategorySelection />} />
+          <Route path="/host/lobby" element={<Lobby />} />
+          <Route path="/host/game/:pin" element={<GameRoom />} />
+          <Route path="/play" element={<Join />} />
+          <Route path="/join" element={<Join />} />
+          <Route path="/play/game/:pin" element={<PlayerController />} />
+        </Routes>
+      </ScaledContainer>
     </BrowserRouter>
   );
 }

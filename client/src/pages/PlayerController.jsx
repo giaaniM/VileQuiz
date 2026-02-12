@@ -140,7 +140,7 @@ function PlayerController() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-primary flex items-center justify-center text-white p-4 text-center">
+            <div className="min-h-full bg-primary flex items-center justify-center text-white p-4 text-center">
                 <div>
                     <h1 className="text-3xl font-bold mb-4">⚠️ Errore</h1>
                     <p>{error}</p>
