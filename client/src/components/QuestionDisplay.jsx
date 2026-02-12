@@ -23,7 +23,7 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
     ];
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4 flex flex-col h-screen max-h-[90vh]">
+        <div className="w-full max-w-6xl mx-auto px-10 md:px-16 pt-4 pb-10 md:pb-14 flex flex-col" style={{ height: 'var(--screen-h)' }}>
             {/* Header: Progress & Timer */}
             <div className="flex justify-between items-center mb-2 md:mb-4">
                 <div className="card-duo px-4 py-2 md:px-6 md:py-3">
@@ -31,7 +31,7 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
                         DOMANDA {currentQuestionIndex} / {totalQuestions}
                     </span>
                 </div>
-                <div className="flex items-center gap-2 md:gap-3">
+                <div className="flex items-center gap-2 md:gap-3 mr-10">
                     <div className={`text-3xl md:text-5xl font-black font-nunito ${timeLeft <= 5 ? 'text-duo-red animate-pulse' : 'text-white'}`}>
                         {timeLeft}
                     </div>
