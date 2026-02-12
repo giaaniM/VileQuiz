@@ -84,7 +84,7 @@ function Lobby() {
 
     if (!category) {
         return (
-            <div className="min-h-screen bg-primary flex items-center justify-center">
+            <div className="min-h-full bg-primary flex items-center justify-center">
                 <div className="text-white text-xl font-nunito">Categoria non selezionata</div>
             </div>
         );
@@ -92,7 +92,7 @@ function Lobby() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-primary flex items-center justify-center">
+            <div className="min-h-full bg-primary flex items-center justify-center">
                 <div className="text-white text-2xl font-nunito font-bold">Creando lobby...</div>
             </div>
         );
@@ -100,7 +100,7 @@ function Lobby() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-primary flex items-center justify-center">
+            <div className="min-h-full bg-primary flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-white mb-4 font-nunito">⚠️ Errore</h2>
                     <p className="text-white/80">{error}</p>
@@ -110,7 +110,7 @@ function Lobby() {
     }
 
     return (
-        <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4 md:p-8 relative">
+        <div className="min-h-full bg-primary flex flex-col items-center justify-center p-4 md:p-8 relative">
 
             <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 min-h-[85vh] h-auto">
 
