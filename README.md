@@ -2,24 +2,33 @@
 
 Web app multiplayer in tempo reale con generazione dinamica delle domande tramite AI (Groq/Llama) e sistema avanzato anti-allucinazione.
 
-## 🚀 Quick Start
+## 🚀 Live Demo
+👉 **Gioca Ora:** [https://vilequiz.onrender.com](https://vilequiz.onrender.com)
+
+---
+
+## 💻 Local Development
 
 ### 1. Installare le dipendenze
+Assicurati di avere Node.js installato.
 
 ```bash
 npm run install:all
 ```
 
 ### 2. Avviare l'applicazione
+In modalità sviluppo (con hot-reload):
 
 ```bash
 npm run dev
 ```
 
 Questo avvierà:
-- **Client**: http://localhost:5173
+- **Client**: http://localhost:5173 (Proxy su API)
 - **Server**: http://localhost:3001
-- **Health Check**: http://localhost:3001/api/health
+- **API**: http://localhost:3001/api/health
+
+> **Nota:** Il progetto è configurato per funzionare "Zero-Config" in locale. La chiave API di test è inclusa (offuscata) per facilitare lo sviluppo.
 
 ## 📁 Struttura Progetto
 
