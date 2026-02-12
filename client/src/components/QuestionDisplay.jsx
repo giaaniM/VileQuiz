@@ -22,17 +22,33 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
         { color: 'bg-answerD', darkBorder: 'border-b-[#4CAD00]', symbol: 'D' }
     ];
 
+    // Dynamic font size based on question length
+    const questionFontSize = question.text.length > 140
+        ? 'clamp(0.85rem, 2.5vh, 1.25rem)'
+        : question.text.length > 80
+            ? 'clamp(1rem, 3vh, 1.5rem)'
+            : 'clamp(1.15rem, 3.5vh, 2rem)';
+
     return (
-        <div className="w-full max-w-5xl mx-auto px-3 py-2 md:p-4 flex flex-col h-screen max-h-[100vh]">
+        <div
+            className="w-full max-w-5xl mx-auto flex flex-col"
+            style={{ height: '100vh', padding: 'clamp(8px, 1.5vh, 16px) clamp(8px, 1.5vw, 16px)' }}
+        >
             {/* Header: Progress & Timer */}
-            <div className="flex justify-between items-center mb-1 md:mb-3">
-                <div className="card-duo px-3 py-1 md:px-5 md:py-2">
-                    <span className="text-xs md:text-base font-bold text-white tracking-wider font-nunito">
+            <div className="flex justify-between items-center shrink-0" style={{ marginBottom: 'clamp(4px, 0.8vh, 12px)' }}>
+                <div className="card-duo" style={{ padding: 'clamp(4px, 0.8vh, 10px) clamp(8px, 1.5vw, 20px)' }}>
+                    <span
+                        className="font-bold text-white tracking-wider font-nunito"
+                        style={{ fontSize: 'clamp(0.65rem, 1.5vh, 1rem)' }}
+                    >
                         DOMANDA {currentQuestionIndex} / {totalQuestions}
                     </span>
                 </div>
-                <div className="flex items-center gap-1 md:gap-2">
-                    <div className={`text-2xl md:text-4xl font-black font-nunito ${timeLeft <= 5 ? 'text-duo-red animate-pulse' : 'text-white'}`}>
+                <div className="flex items-center gap-1">
+                    <div
+                        className={`font-black font-nunito ${timeLeft <= 5 ? 'text-duo-red animate-pulse' : 'text-white'}`}
+                        style={{ fontSize: 'clamp(1.25rem, 4vh, 2.5rem)' }}
+                    >
                         {timeLeft}
                     </div>
                 </div>
@@ -42,39 +58,49 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="card-duo relative overflow-hidden mb-1 md:mb-3 flex-grow flex flex-col min-h-0"
+                className="card-duo relative overflow-hidden flex-grow flex flex-col min-h-0"
+                style={{ marginBottom: 'clamp(4px, 0.6vh, 12px)', maxHeight: '38vh' }}
             >
                 {/* Background Image Header */}
                 {question.categoryImage && (
                     <>
                         <div
-                            className="absolute inset-x-0 top-0 h-24 md:h-40 bg-cover bg-center opacity-50"
-                            style={{ backgroundImage: `url(${question.categoryImage})` }}
+                            className="absolute inset-x-0 top-0 bg-cover bg-center opacity-50"
+                            style={{ height: 'clamp(60px, 15vh, 160px)', backgroundImage: `url(${question.categoryImage})` }}
                         />
-                        <div className="absolute inset-x-0 top-0 h-24 md:h-40 bg-gradient-to-b from-primary-card/10 via-primary-card/60 to-primary-card" />
+                        <div
+                            className="absolute inset-x-0 top-0 bg-gradient-to-b from-primary-card/10 via-primary-card/60 to-primary-card"
+                            style={{ height: 'clamp(60px, 15vh, 160px)' }}
+                        />
                     </>
                 )}
 
                 {/* Content */}
-                <div className="relative z-10 flex flex-col items-center justify-center flex-grow p-3 md:p-6 text-center overscroll-contain">
+                <div className="relative z-10 flex flex-col items-center justify-center flex-grow text-center overscroll-contain"
+                    style={{ padding: 'clamp(8px, 1.5vh, 24px) clamp(12px, 2vw, 32px)' }}
+                >
                     {question.category && (
-                        <span className="inline-block px-2 py-0.5 bg-duo-purple/20 backdrop-blur-md text-duo-purple text-[10px] md:text-xs font-bold rounded-full border border-duo-purple/30 font-nunito uppercase tracking-wider mb-1 md:mb-3 shadow-lg">
+                        <span
+                            className="inline-block bg-duo-purple/20 backdrop-blur-md text-duo-purple font-bold rounded-full border border-duo-purple/30 font-nunito uppercase tracking-wider shadow-lg"
+                            style={{ fontSize: 'clamp(0.55rem, 1.2vh, 0.75rem)', padding: 'clamp(2px, 0.4vh, 4px) clamp(6px, 1vw, 12px)', marginBottom: 'clamp(4px, 0.8vh, 16px)' }}
+                        >
                             {question.category}
                         </span>
                     )}
-                    <h2 className={`
-                        font-black text-white leading-tight font-nunito drop-shadow-md
-                        ${question.text.length > 140 ? 'text-base md:text-xl' :
-                            question.text.length > 80 ? 'text-lg md:text-2xl' :
-                                'text-xl md:text-3xl lg:text-4xl'}
-                    `}>
+                    <h2
+                        className="font-black text-white leading-tight font-nunito drop-shadow-md"
+                        style={{ fontSize: questionFontSize }}
+                    >
                         {question.text}
                     </h2>
                 </div>
             </motion.div>
 
             {/* Timer Bar */}
-            <div className="w-full h-3 md:h-5 bg-primary-card rounded-full mb-1.5 md:mb-3 overflow-hidden border border-white/10 shrink-0">
+            <div
+                className="w-full bg-primary-card rounded-full overflow-hidden border border-white/10 shrink-0"
+                style={{ height: 'clamp(6px, 1vh, 20px)', marginBottom: 'clamp(4px, 0.6vh, 12px)' }}
+            >
                 <motion.div
                     className={`h-full rounded-full ${timeLeft <= 5 ? 'bg-duo-red' : timeLeft <= 10 ? 'bg-duo-orange' : 'bg-duo-green'}`}
                     initial={{ width: '100%' }}
@@ -84,20 +110,27 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
             </div>
 
             {/* Options Grid */}
-            <div className="grid grid-cols-2 gap-1.5 md:gap-3 shrink-0">
+            <div className="grid grid-cols-2 shrink-0" style={{ gap: 'clamp(4px, 0.8vh, 12px)' }}>
                 {question.options.map((option, index) => (
                     <motion.div
                         key={index}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`${optionsConfig[index].color} rounded-duo p-2 md:p-4 flex items-center shadow-duo border-b-[3px] ${optionsConfig[index].darkBorder}`}
+                        className={`${optionsConfig[index].color} rounded-duo flex items-center shadow-duo border-b-[3px] ${optionsConfig[index].darkBorder}`}
+                        style={{ padding: 'clamp(6px, 1.2vh, 16px) clamp(6px, 1vw, 16px)' }}
                     >
-                        <div className="flex items-center gap-2 md:gap-4 w-full">
-                            <div className="w-8 h-8 md:w-12 md:h-12 bg-black/20 rounded-full flex items-center justify-center text-sm md:text-xl text-white font-black font-nunito flex-shrink-0">
+                        <div className="flex items-center w-full" style={{ gap: 'clamp(6px, 1vw, 16px)' }}>
+                            <div
+                                className="bg-black/20 rounded-full flex items-center justify-center text-white font-black font-nunito flex-shrink-0"
+                                style={{ width: 'clamp(28px, 5vh, 48px)', height: 'clamp(28px, 5vh, 48px)', fontSize: 'clamp(0.7rem, 2vh, 1.25rem)' }}
+                            >
                                 {optionsConfig[index].symbol}
                             </div>
-                            <span className={`font-bold text-white font-nunito leading-tight ${option.length > 40 ? 'text-xs md:text-base' : 'text-sm md:text-lg'}`}>
+                            <span
+                                className="font-bold text-white font-nunito leading-tight"
+                                style={{ fontSize: option.length > 40 ? 'clamp(0.65rem, 1.5vh, 1rem)' : 'clamp(0.75rem, 2vh, 1.15rem)' }}
+                            >
                                 {option}
                             </span>
                         </div>
