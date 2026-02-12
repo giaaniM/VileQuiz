@@ -171,7 +171,7 @@ function Lobby() {
                                 {pin}
                             </div>
                             <div className="mt-1 text-white/30 font-nunito text-[10px] md:text-xs truncate">
-                                Scansiona o vai su <span className="text-white/60 font-bold">{joinUrl?.replace('http://', '').replace('https://', '').split('/')[0]}</span>
+                                Scansiona o vai su <span className="text-white/60 font-bold">{joinUrl?.replace('http://', '').replace('https://', '')}</span>
                             </div>
                         </div>
                     </div>
