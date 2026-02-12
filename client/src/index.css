@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: #131f24;
+  min-height: 100vh;
+  color: white;
+}
+
+/* Duolingo Dark Background */
+.bg-duo-dark {
+  background-color: #131f24;
+}
+
+/* Cosmic bg for backward compat — now maps to duo dark */
+.bg-cosmic {
+  background-color: #131f24;
+}
+
+/* Pattern Overlay (unused in new design) */
+.bg-pattern {
+  background-color: #1a2d35;
+}
+
+/* Duolingo-style 3D button */
+.btn-duo {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.btn-duo:active {
+  transform: translateY(4px);
+  box-shadow: none !important;
+}
+
+.btn-duo-green {
+  background-color: #58cc02;
+  color: white;
+  box-shadow: 0 4px 0 0 #4CAD00;
+}
+
+.btn-duo-green:hover {
+  background-color: #61d800;
+}
+
+.btn-duo-blue {
+  background-color: #1cb0f6;
+  color: white;
+  box-shadow: 0 4px 0 0 #1899D6;
+}
+
+.btn-duo-blue:hover {
+  background-color: #28bfff;
+}
+
+.btn-duo-white {
+  background-color: #ffffff;
+  color: #131f24;
+  box-shadow: 0 4px 0 0 #e5e5e5;
+}
+
+.btn-duo-white:hover {
+  background-color: #f7f7f7;
+}
+
+/* Duolingo card style */
+.card-duo {
+  background-color: #1e3a44;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}

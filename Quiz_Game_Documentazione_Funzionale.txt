@@ -1,0 +1,378 @@
+QUIZ GAME WEB APP
+Documento Funzionale e Architettura Tecnica
+
+INDICE
+1. Executive Summary
+2. Architettura Tecnica
+3. Flusso di Gioco Dettagliato
+4. Specifiche UI/UX
+5. Integrazione LLM
+6. Database e Persistenza
+7. Prompt AI per Sviluppo
+8. Appendici
+
+1. EXECUTIVE SUMMARY
+Quiz Game è una web app multiplayer in tempo reale ispirata a Kahoot, con generazione dinamica delle domande tramite LLM (Llama). Il gioco prevede un host su desktop/laptop che controlla la partita e partecipanti che rispondono tramite smartphone.
+1.1 Caratteristiche Principali
+Generazione domande AI-powered con LLM (Llama o alternativa free)
+Multiplayer real-time via WebSocket (Socket.IO)
+QR Code per join rapido da mobile
+Mobile come controller (A/B/C/D buttons)
+Animazioni fluide e musiche coinvolgenti
+Classifica dinamica con sorpassi animati
+NO vantaggi per velocità di risposta - solo correttezza
+Timer 15 secondi per domanda
+1.2 Target e Use Cases
+Educazione: quiz didattici in classe
+Team building: eventi aziendali
+Social gaming: serate con amici
+Training: formazione interattiva
+
+2. ARCHITETTURA TECNICA
+2.1 Stack Tecnologico
+FRONTEND
+Tecnologia
+Versione
+Scopo
+React
+18.x
+UI components e state management
+React Router
+6.x
+Routing SPA
+Socket.IO Client
+4.x
+WebSocket real-time
+Framer Motion
+10.x
+Animazioni fluide
+QRCode.react
+3.x
+Generazione QR codes
+Tailwind CSS
+3.x
+Styling responsive
+Howler.js
+2.x
+Audio/musiche
+
+BACKEND
+Tecnologia
+Versione
+Scopo
+Node.js
+20.x LTS
+Runtime server
+Express
+4.x
+Web server e API
+Socket.IO
+4.x
+WebSocket server
+LlamaIndex / Ollama
+Latest
+LLM integration
+MongoDB
+6.x
+Database (categorie/stats)
+Redis
+7.x
+Cache sessioni/game state
+2.2 Architettura a 3 Tier
+PRESENTATION LAYER (Client)
+Host App (Desktop): selezione categorie, controllo game, visualizzazione domande e classifiche
+Player App (Mobile): lobby join, nickname, controller A/B/C/D, feedback istantaneo
+APPLICATION LAYER (Server)
+Game Manager: orchestrazione partite, timer, scoring
+Socket Handler: gestione connessioni WebSocket
+LLM Service: generazione domande AI
+Category Service: gestione categorie e immagini stock
+DATA LAYER
+MongoDB: categorie, domande generate, statistiche
+Redis: game state in-memory, sessioni attive
+
+3. FLUSSO DI GIOCO DETTAGLIATO
+3.1 Fase 1: Setup (Host Desktop)
+Host apre l'app su browser desktop
+Visualizza griglia categorie con immagini stock e descrizione breve
+Seleziona una categoria (es: Geografia, Storia, Scienza, Pop Culture)
+Sistema genera PIN game univoco (6 cifre)
+Viene mostrato QR code + PIN per join
+3.2 Fase 2: Lobby (Players Mobile)
+Player scansiona QR o inserisce PIN manualmente
+Accede alla lobby, vede avatar casuale assegnato
+Inserisce nickname (max 12 caratteri)
+Vede nickname + avatar + punteggio 0
+Desktop mostra lista players connessi in real-time
+Host clicca 'Avvia Partita'
+3.3 Fase 3: Generazione Domande
+Backend chiama LLM con prompt specifico per categoria
+LLM genera N domande (configurabile, default 10)
+Ogni domanda: testo, 4 risposte (A/B/C/D), risposta corretta, difficoltà
+Domande salvate in cache Redis per la partita
+3.4 Fase 4: Round Loop (per ogni domanda)
+A. Schermata Preparatoria (3s)
+Desktop + Mobile: "Preparati!" con animazione pulsante
+Sfondo colorato dinamico
+Audio: suono carica energia
+B. Countdown (3s)
+Desktop + Mobile: "3... 2... 1... GO!"
+Animazione numeri con scale + fade
+Audio: tick-tock sincronizzato
+C. Visualizzazione Domanda (15s)
+Desktop: mostra domanda + numero round + timer circolare
+Mobile: bottoni A/B/C/D colorati (Rosso/Blu/Giallo/Verde)
+Timer visivo: barra progressiva che si svuota
+Ultimi 5s: timer lampeggia + audio urgenza
+D. Raccolta Risposte
+Player tocca A/B/C/D: bottone si illumina + feedback tattile (vibrazione)
+Risposta inviata via Socket.IO al server
+Desktop mostra contatore "X/Y hanno risposto"
+Player può cambiare risposta fino a scadenza timer
+E. Reveal Risposta Corretta
+Desktop: evidenzia risposta corretta in VERDE con animazione expand
+Mobile: mostra feedback personalizzato:
+  - Risposta corretta: ✓ verde + punti guadagnati + suono vittoria
+  - Risposta sbagliata: ✗ rosso + mostra corretta + suono errore
+  - Nessuna risposta: "Tempo scaduto!" giallo + suono buzzer
+Durata reveal: 3 secondi
+F. Classifica Intermedia (5s)
+Desktop: podio animato TOP 5 giocatori
+Animazione sorpassi: se player sale posizioni → slide up con scia
+Colori podio: 1° oro, 2° argento, 3° bronzo, altri bianco
+Mobile: mostra posizione personale + punti totali
+Audio: fanfara crescente se leader cambia
+3.5 Fase 5: Podio Finale
+Desktop: animazione esplosione confetti
+Mostra TOP 3 su podio 3D con avatar giganti
+Nome vincitore con effetto glow pulsante
+Statistiche partita: % risposte corrette, tempo medio
+Bottone "Gioca Ancora" / "Cambia Categoria"
+Mobile: celebrazione personalizzata basata su posizione finale
+Audio: inno vittoria per vincitore, applausi per altri
+
+4. SPECIFICHE UI/UX
+4.1 Design System - Palette Colori
+Elemento
+Colore
+Uso
+Primary
+#2E3192 (blu Kahoot)
+Background principale, CTA
+Risposta A
+#E21B3C (rosso)
+Bottone A, triangolo
+Risposta B
+#1368CE (blu)
+Bottone B, rombo
+Risposta C
+#D89E00 (giallo)
+Bottone C, cerchio
+Risposta D
+#26890C (verde)
+Bottone D, quadrato
+Correct
+#4CAF50 (verde)
+Feedback risposta corretta
+Wrong
+#F44336 (rosso)
+Feedback risposta errata
+Timeout
+#FFA726 (arancione)
+Feedback tempo scaduto
+4.2 Typography
+Font principale: Montserrat Bold per titoli
+Font body: Open Sans Regular
+Domande: 28px, line-height 1.4
+Risposte mobile: 20px, bold
+Timer: 48px, monospace
+4.3 Animazioni (Framer Motion)
+Elemento
+Animazione
+Durata
+Lobby player join
+Slide in from right + bounce
+0.3s
+Countdown numeri
+Scale 0→1.5→1 + fade
+0.8s
+Bottoni risposta
+Press: scale 0.95 + glow
+0.1s
+Timer urgenza
+Pulse scale 1→1.1
+0.5s loop
+Reveal corretta
+Expand + glow pulsante
+0.6s
+Classifica sorpassi
+Slide up + trail effect
+0.8s
+Confetti finale
+Particle explosion
+2s
+4.4 Audio Design
+Lobby BGM: loop music leggero 110 BPM
+Countdown: tick-tock mechanic
+Timer urgenza: heartbeat accelerato
+Risposta corretta: ding victorioso
+Risposta sbagliata: buzzer fail
+Sorpasso classifica: whoosh + sparkle
+Vittoria finale: fanfara orchestrale
+
+5. INTEGRAZIONE LLM
+5.1 LLM Options
+⭐ RACCOMANDATO: Groq API (VELOCISSIMO)
+API Configuration: const API_KEY = 'YOUR_API_KEY_HERE'; const url = 'https://api.groq.com/openai/v1/chat/completions';  Modello RACCOMANDATO: "llama-3.3-70b-versatile" - Velocità: ~900 tokens/sec (IL PIÙ VELOCE disponibile) - Latency: ~15ms time-to-first-token - Context: 128k tokens - Free tier: 30 req/min, 6,000 req/day - Costo: $0 (free tier) o $0.59/$0.79 per 1M tokens (paid)  ALTERNATIVE Groq (in ordine di velocità): 1. llama-3.1-70b-versatile - Simile a 3.3, leggermente più lento 2. llama-3.1-8b-instant - Ultra rapido (1000+ tokens/sec) ma meno accurato 3. mixtral-8x7b-32768 - Buon bilanciamento velocità/qualità  PERCHÉ Groq è IDEALE per questo progetto: ✓ Generazione domande in <2 secondi (critico per UX) ✓ Free tier generoso (6k requests/day = ~600 partite/giorno) ✓ LPU (Language Processing Unit) hardware dedicato ✓ Latenza sub-100ms (perfetto per gaming real-time) ✓ NO cold starts (sempre hot)
+
+Alternative (se Groq rate limit)
+Ollama + Llama 3.1 (8B) self-hosted - Richiede GPU server
+Together AI - Llama 3.1 405B - free tier limitato
+OpenRouter - Vari modelli free rotation
+5.2 Prompt Engineering - Template Base
+Sei un generatore di quiz educativi per un gioco multiplayer. Genera esattamente {N} domande sulla categoria: {CATEGORIA}  REQUISITI: - Difficoltà: medio-semplice (adatto a studenti 14-18 anni o adulti casual) - Ogni domanda deve avere esattamente 4 risposte (A, B, C, D) - Solo 1 risposta corretta per domanda - Le risposte sbagliate devono essere plausibili ma chiaramente distinguibili - Domande chiare, concise, senza ambiguità - Evita domande che richiedono conoscenze ultra-specifiche - Varia la tipologia: fatti, definizioni, confronti, cause-effetti  FORMATO OUTPUT (JSON): {   "questions": [     {       "id": 1,       "text": "Dove si trova il Taj Mahal?",       "answers": {         "A": "Malaysia",         "B": "Sri Lanka",         "C": "India",         "D": "Yemen"       },       "correct": "C",       "difficulty": "easy",       "category": "Geografia"     }   ] }  Genera ora {N} domande seguendo rigorosamente questo formato.
+5.3 Esempi Prompt per Categoria
+GEOGRAFIA
+Focus: capitali, monumenti famosi, mari/fiumi, curiosità geografiche
+Esempio: "Qual è il fiume più lungo del mondo?"
+STORIA
+Focus: eventi chiave, personaggi storici, date importanti, invenzioni
+Esempio: "In che anno è caduto il Muro di Berlino?"
+SCIENZA
+Focus: fisica base, chimica, biologia, corpo umano, astronomia
+Esempio: "Quanti pianeti ci sono nel sistema solare?"
+POP CULTURE
+Focus: film, musica, sport, videogiochi, meme, trend
+Esempio: "Chi ha diretto il film Inception?"
+
+6. DATABASE E PERSISTENZA
+6.1 Schema MongoDB
+Collection: categories
+{   _id: ObjectId,   name: "Geografia",   description: "Esplora il mondo con quiz su capitali, monumenti e curiosità",   icon_url: "https://images.unsplash.com/...",   difficulty_range: ["easy", "medium"],   total_questions_generated: 1247,   avg_rating: 4.5,   created_at: ISODate,   updated_at: ISODate }
+Collection: games
+{   _id: ObjectId,   game_pin: "123456",   category: "Geografia",   host_socket_id: "abc123",   status: "active", // lobby, active, finished   players: [     {       socket_id: "xyz789",       nickname: "Player1",       avatar: "viking",       score: 0,       answers: []     }   ],   questions: [...],   current_question_index: 0,   created_at: ISODate,   finished_at: ISODate }
+Collection: statistics
+{   _id: ObjectId,   game_id: ObjectId,   total_players: 12,   total_questions: 10,   avg_correct_percentage: 67.5,   avg_response_time: 8.3,   winner: "Player1",   winner_score: 9,   leaderboard: [...],   created_at: ISODate }
+6.2 Redis Cache Structure
+Key pattern: game:{pin} → Game state completo
+Key pattern: session:{socket_id} → Player session
+TTL: 2 ore (auto-cleanup giochi inattivi)
+Pub/Sub channels per real-time events
+
+7. PROMPT AI PER SVILUPPO
+Questa sezione contiene i prompt sequenziali da fornire all'AI per sviluppare il progetto step-by-step. Ogni prompt è autocontenuto e deve essere eseguito nell'ordine specificato.
+PROMPT 1: Setup Progetto Base
+Crea la struttura base del progetto Quiz Game Web App seguendo questa architettura:  STRUTTURA CARTELLE: quiz-game/ ├── client/                 # React frontend │   ├── public/ │   ├── src/ │   │   ├── components/    # React components │   │   ├── pages/         # Host e Player pages │   │   ├── hooks/         # Custom hooks (useSocket, useGame) │   │   ├── utils/         # Helpers │   │   ├── assets/        # Audio, images │   │   └── App.jsx │   ├── package.json │   └── tailwind.config.js ├── server/                # Node.js backend │   ├── src/ │   │   ├── controllers/ │   │   ├── services/      # GameService, LLMService │   │   ├── socket/        # Socket.IO handlers │   │   ├── models/        # MongoDB schemas │   │   └── server.js │   └── package.json └── README.md  REQUISITI: 1. Inizializza React con Vite + TailwindCSS 2. Setup Express server con Socket.IO 3. Configura MongoDB connection (mongoose) 4. Configura Redis client 5. Setup environment variables (.env.example) 6. Crea docker-compose.yml per MongoDB + Redis locale 7. Package.json scripts per dev concorrente (client + server)  DELIVERABLE: - Progetto inizializzato e funzionante - npm run dev avvia client (port 3000) e server (port 3001) - Health check endpoint /api/health - Socket.IO connection test funzionante
+
+PROMPT 2: Sistema Categorie + Immagini Stock
+Implementa il sistema di gestione categorie di quiz:  BACKEND: 1. Modello MongoDB Category 2. API REST:    - GET /api/categories → lista categorie con immagini    - POST /api/categories → crea nuova categoria (admin) 3. Seed database con 10 categorie iniziali 4. Integrazione Unsplash API per immagini stock  FRONTEND (Host): 1. Pagina CategorySelection con grid responsive 2. Card categoria con immagine background, nome, descrizione 3. Animazione hover: scale + lift shadow 4. Click categoria → transizione a Lobby  DESIGN: - Grid: 2 col mobile, 3 col tablet, 4 col desktop - Card aspect ratio 16:9 - Skeleton loader durante fetch
+
+PROMPT 3: Sistema Lobby + QR Code
+Implementa lobby multiplayer con join via QR code:  BACKEND: 1. Socket.IO events:    - 'create-game' → genera PIN 6 cifre univoco    - 'join-game' → valida PIN, assegna avatar    - 'update-nickname' → valida e aggiorna    - 'start-game' → transizione a generazione domande 2. Game manager: PIN univoci, pool 20 avatar, max 50 players  FRONTEND HOST: 1. QR code grande con react-qr-code 2. PIN numerico visibile (80px font) 3. Lista players real-time 4. Bottone "Avvia Partita" (min 2 players)  FRONTEND PLAYER: 1. Input PIN manuale (fallback QR) 2. Form nickname (max 12 char) 3. Avatar preview 4. Stato "Waiting for host..."
+
+PROMPT 4: Integrazione LLM + Generazione Domande
+Implementa generazione AI delle domande con Groq:  SETUP GROQ API (RACCOMANDATO): 1. Crea file .env:    GROQ_API_KEY=YOUR_API_KEY_HERE    GROQ_MODEL=llama-3.3-70b-versatile    GROQ_URL=https://api.groq.com/openai/v1/chat/completions  2. LLMService (server/src/services/LLMService.js):    - generateQuestions(category, count) usando Groq API    - Retry logic: 3 tentativi con exponential backoff    - Timeout: 30s per request    - Fallback a domande pre-generate se API offline     3. Rate limiting:    - Free tier: 30 req/min, 6,000/day    - Implementa queue system per batch requests    - Cache domande generate in Redis (TTL 24h)  4. Groq API call example:    fetch(process.env.GROQ_URL, {      method: 'POST',      headers: {        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,        'Content-Type': 'application/json'      },      body: JSON.stringify({        model: 'llama-3.3-70b-versatile',        messages: [{ role: 'user', content: prompt }],        temperature: 0.7,        max_tokens: 2000      })    })  PROMPT ENGINEERING: 1. Usa template definito nella sezione 5.2 2. Parser JSON response robusto con schema validation 3. Quality checks: lunghezza domanda, unicità risposte  PERFORMANCE ATTESE: - Generazione 10 domande: <2 secondi (CRITICO per UX) - First token latency: ~15ms - Total tokens/sec: ~900 (velocissimo)  BACKEND: 1. Endpoint POST /api/generate-questions 2. Cache domande in Redis (TTL 24h) 3. Logging per monitoring qualità  FRONTEND: 1. Loading "Generando domande..." con progress bar 2. Timeout UI dopo 40s con retry 3. Error state: fallback a domande default
+
+PROMPT 5: Game Loop - Countdown e Domande
+Implementa il loop di gioco principale:  BACKEND: 1. Socket events: question-ready, answer-submitted, time-up, reveal-answer 2. Timer server-side: countdown 15s strict 3. Scoring: +100 punti per risposta corretta (NO bonus velocità)  FRONTEND HOST: 1. QuestionDisplay: header, testo domanda, timer circolare 2. Timer animation: cerchio che si svuota, verde→giallo→rosso 3. Audio tick-tock sincronizzato 4. Reveal: highlight risposta corretta verde  FRONTEND PLAYER: 1. 4 bottoni A/B/C/D full-screen (layout 2x2) 2. Colori Kahoot: rosso, blu, giallo, verde 3. Tap: select + vibration feedback 4. Feedback: ✓ verde, ✗ rosso, ⏱ giallo
+
+PROMPT 6: Classifica Animata + Sorpassi
+Implementa sistema classifica con animazioni sorpassi:  BACKEND: 1. Calcolo ranking ordinato per score DESC 2. Tracking posizioni precedenti per detect sorpassi 3. Emit 'leaderboard-update' dopo ogni domanda  FRONTEND HOST: 1. LeaderboardScreen: TOP 5, podio 3D per top 3 2. Animazioni Framer Motion: sort animation spring 3. Sorpasso: slide up + trail effect 4. Colori podio: gold, silver, bronze 5. Audio: whoosh per sorpasso, fanfara per nuovo leader  FRONTEND PLAYER: 1. Mostra solo posizione personale + score 2. Badge top 3 se applicabile 3. Motivational messages basati su posizione
+
+PROMPT 7: Podio Finale + Celebrazione
+Implementa schermata finale con celebrazione vincitore:  FRONTEND HOST: 1. FinalPodium: zoom in 3D, confetti explosion 2. TOP 3 con avatar giganti 3. Statistiche globali partita 4. Bottoni "Gioca Ancora" / "Cambia Categoria" 5. Audio: inno vittoria 10s + applausi loop  FRONTEND PLAYER: 1. Risultato personalizzato basato su posizione 2. Stats personali: risposte corrette, streak, punti 3. Rating experience (1-5 stelle)  BACKEND: 1. Salva statistiche in MongoDB 2. Cleanup game da Redis 3. Emit 'game-finished' event
+
+PROMPT 8: Audio System + Musiche
+Implementa sistema audio completo con Howler.js:  AUDIO ASSETS (royalty-free da Pixabay/FreePD): - lobby_bgm.mp3, countdown.mp3, timer_urgent.mp3 - correct_answer.mp3, wrong_answer.mp3, time_up.mp3 - overtake.mp3, new_leader.mp3, victory.mp3, applause.mp3  IMPLEMENTAZIONE: 1. Audio manager con Howler: preload, volume control, mute toggle 2. React hook useSound() 3. Audio triggers sincronizzati con eventi 4. Vibration API per feedback tattile mobile  SETTINGS: 1. Toggle audio on/off 2. Volume slider (master) 3. Separate music vs SFX 4. Persist in localStorage
+
+PROMPT 9: Polish UI + Responsive Design
+Refina UI/UX e assicura responsive design:  DESKTOP (Host): 1. Breakpoints: 1920x1080 base, 1366x768 scale 0.85 2. Full-screen mode supportato 3. Keyboard shortcuts (spazio, esc)  MOBILE (Player): 1. Breakpoints: 390x844 (iPhone 14) base, 360x800 Android 2. Landscape disabled (force portrait) 3. Touch targets min 48x48px 4. 60fps animations garantiti  DESIGN REFINEMENT: 1. Color contrast AA compliance 2. Focus states per accessibility 3. Loading skeletons 4. Error boundaries React  CROSS-BROWSER: Test su Chrome, Safari, Firefox, Edge (120+)
+
+PROMPT 10: Testing + Deployment su Render
+Setup testing e deployment production-ready:  TESTING: 1. Unit tests (Vitest): LLMService, GameService, Socket handlers 2. Integration tests: full game flow con mock Groq 3. E2E tests (Playwright): complete 3-question game 4. Load testing: 50 concurrent players con Artillery  DEPLOYMENT SU RENDER.COM (RACCOMANDATO):  1. SETUP RENDER:    - Crea account su render.com    - Collega repository GitHub    - Free tier: 750h/mese (sufficiente per prototipo)    - Upgrade a Starter ($7/month) per produzione  2. BACKEND (Web Service):    - Build command: npm install && npm run build    - Start command: node server/src/server.js    - Environment: Node 20    - Plan: Free (o Starter per autoscaling)    - Environment variables:      * GROQ_API_KEY      * MONGODB_URI      * REDIS_URL      * PORT=3001  3. REDIS (da Render):    - Plan: Free (25MB, 10 connections)    - Auto-provision tramite dashboard    - Collegamento automatico al backend  4. DATABASE:    - MongoDB Atlas: free tier 512MB    - Connection string in env vars  5. FRONTEND:    - Deploy su Vercel/Netlify (più veloce per static)    - Environment variable: VITE_API_URL=https://your-app.onrender.com  PERFORMANCE ATTESE SU RENDER: ✓ WebSocket latency: 10-50ms (EU/US) ✓ Concurrent connections: 1000+ (free), illimitate (paid) ✓ Socket.IO broadcasts: <100ms ✓ Timer accuracy: ±10-20ms (OK per quiz 15s) ✓ Deploy time: 2-3 minuti ✓ Zero downtime deploys ✓ Auto SSL certificate  ⚠️ LIMITAZIONI FREE TIER: - CPU throttling dopo picchi - Sleep dopo 15min inattività (starter NO sleep) - Bandwidth: 100GB/mese  RACCOMANDAZIONE: Free tier OK per DEMO/TEST (max 10-20 concurrent games) Starter $7/month per PRODUZIONE (centinaia di games)  CI/CD: 1. GitHub Actions workflow:    - Test su PR    - Auto-deploy su merge to main    - Render webhook trigger  MONITORING: - Sentry: error tracking - Render metrics dashboard: CPU, memory, requests - Uptime monitoring integrato  DOCUMENTATION: README con deploy instructions, API docs, troubleshooting
+
+APPENDICE A: Configurazione Tecnica Dettagliata
+A.1 Groq API - Setup Completo
+CREDENZIALI: API Key: YOUR_API_KEY_HERE Endpoint: https://api.groq.com/openai/v1/chat/completions Modello: llama-3.3-70b-versatile  FILE .ENV: GROQ_API_KEY=YOUR_API_KEY_HERE GROQ_MODEL=llama-3.3-70b-versatile GROQ_MAX_TOKENS=2000 GROQ_TEMPERATURE=0.7  CODICE ESEMPIO (server/src/services/LLMService.js):  const axios = require('axios');  class LLMService {   constructor() {     this.apiKey = process.env.GROQ_API_KEY;     this.model = process.env.GROQ_MODEL;     this.url = 'https://api.groq.com/openai/v1/chat/completions';   }    async generateQuestions(category, count = 10) {     const prompt = this.buildPrompt(category, count);          try {       const response = await axios.post(this.url, {         model: this.model,         messages: [{ role: 'user', content: prompt }],         temperature: 0.7,         max_tokens: 2000,       }, {         headers: {           'Authorization': `Bearer ${this.apiKey}`,           'Content-Type': 'application/json'         },         timeout: 30000       });        const content = response.data.choices[0].message.content;       return this.parseQuestions(content);     } catch (error) {       console.error('Groq API error:', error);       return this.getFallbackQuestions(category, count);     }   }    buildPrompt(category, count) {     return `Genera ${count} domande quiz per categoria: ${category}      REQUISITI: - Difficoltà: medio-semplice - Formato: 4 risposte (A/B/C/D), 1 corretta - Output: JSON con struttura: {   "questions": [     {       "id": 1,       "text": "Domanda qui?",       "answers": {"A": "...", "B": "...", "C": "...", "D": "..."},       "correct": "C",       "difficulty": "medium"     }   ] }`;   }    parseQuestions(content) {     // Rimuovi markdown code blocks se presenti     const cleaned = content.replace(/```json|```/g, '').trim();     const parsed = JSON.parse(cleaned);          // Valida struttura     if (!parsed.questions || !Array.isArray(parsed.questions)) {       throw new Error('Invalid questions format');     }          return parsed.questions;   }    getFallbackQuestions(category, count) {     // Ritorna domande pre-generate dal database     return require('./fallback-questions.json')[category].slice(0, count);   } }  module.exports = LLMService;  PERFORMANCE GROQ: - Time to first token: ~15ms - Tokens per secondo: ~900 - Generazione 10 domande: 1.5-2.5 secondi - Rate limits free tier: 30 req/min, 6,000/day
+
+A.2 Render.com - Deployment Guide
+PERCHÉ RENDER È PERFETTO PER QUESTO PROGETTO:  1. WEBSOCKET SUPPORT NATIVO    - NO timeout fissi (altri host limitano a 10-30 minuti)    - Persistent connections (Socket.IO richiede questo)    - Heartbeat mechanism supportato  2. PERFORMANCE REAL-TIME    - Latency WebSocket: 10-50ms (EU/US regions)    - Perfect per quiz game (timer 15s, tolleranza ±100ms)    - Broadcast a 50 players: <100ms     3. ARCHITETTURA    - Web Service (persistent, sempre ON)    - Redis integrato (pub/sub per multi-instance)    - Auto-scaling orizzontale  4. FREE TIER vs STARTER        FREE ($0/mese):    ✓ 750 ore/mese (sufficiente per 1 instance)    ✓ 512MB RAM, 0.1 CPU    ✗ Sleep dopo 15min inattività (wake: 30-60s)    ✗ CPU throttling su spike    ✓ OK per: DEMO, TEST, low traffic        STARTER ($7/mese):    ✓ Always ON (NO sleep)    ✓ 512MB RAM, 0.5 CPU    ✓ Auto-scaling (fino a 3 instances)    ✓ Metrics dashboard avanzati    ✓ OK per: PRODUZIONE, 100+ concurrent games  5. DEPLOY STEPS:        Step 1: Connetti GitHub    - Vai su render.com/new/web    - Autorizza accesso repo GitHub    - Seleziona repository quiz-game        Step 2: Configura Backend    - Name: quiz-game-backend    - Environment: Node    - Build: npm install    - Start: node server/src/server.js    - Plan: Free (o Starter)        Step 3: Environment Variables    GROQ_API_KEY=YOUR_API_KEY_HERE    MONGODB_URI=mongodb+srv://...    REDIS_URL=redis://... (auto da Render Redis)    PORT=3001    NODE_ENV=production        Step 4: Provision Redis    - Dashboard → New → Redis    - Plan: Free (25MB)    - Auto-link al web service        Step 5: Deploy!    - Push to main → auto deploy    - Build time: ~2-3 minuti    - URL: https://quiz-game-backend.onrender.com  6. FRONTEND DEPLOYMENT:    - Usa Vercel (più veloce per React SPA)    - Set env: VITE_API_URL=https://quiz-game-backend.onrender.com    - Deploy time: <1 minuto  7. MONITORING:    - Render Dashboard: CPU, Memory, Requests/sec    - Logs real-time    - Webhook notifiche deploy  RISPOSTA DIRETTA: "È abbastanza rapido per giocare?"  SÌ! Ecco i numeri:  Timer 15 secondi → Tolleranza umana: ±500ms Render latency: 10-50ms → 10x PIÙ VELOCE del necessario  Animazioni client-side → 60fps su browser Nessuna dipendenza da server latency  Classifica aggiornata → Broadcast <100ms Impercettibile per utenti  Socket.IO handshake → ~200ms Una tantum, non impatta gameplay  BOTTLENECK REALI (non Render): 1. Groq API: 1.5-2.5s generazione domande    → OK, avviene PRE-game in loading screen 2. MongoDB query: 5-20ms    → Trascurabile 3. Client network: 20-100ms (dipende da ISP utente)    → Fuori controllo  CONCLUSIONE: Render è IDEALE. La latency è dominata dalla rete dell'utente finale, non dal server. Render aggiunge solo 10-50ms, completamente accettabile.  Alternative considerate: - Heroku: $7/month simile, ma più lento deploy - Railway: Buono, ma meno stabile WebSocket - Fly.io: Ottimo, ma setup complesso - AWS EC2: Overkill, troppo da gestire
+
+
+APPENDICE B: Checklist Finale
+Funzionalità Core
+Feature
+Status
+Selezione categorie con immagini stock
+☐
+Generazione domande via LLM
+☐
+QR code generation + deep link
+☐
+Lobby real-time con Socket.IO
+☐
+Game loop completo
+☐
+Timer 15s preciso
+☐
+Controller mobile A/B/C/D
+☐
+Classifica animata con sorpassi
+☐
+Podio finale + celebrazione
+☐
+Audio system completo
+☐
+Vibration feedback mobile
+☐
+Responsive design
+☐
+Error handling robusto
+☐
+Persistenza MongoDB
+☐
+Cache Redis
+☐
+Performance Targets
+Latency Socket.IO < 100ms
+Animations 60fps stabili
+First Contentful Paint < 1.5s
+Time to Interactive < 3s
+Lighthouse score > 90
+Supporto 50+ concurrent players
+Browser Support
+Chrome/Edge 120+
+Firefox 120+
+Safari 17+ (iOS/macOS)
+Mobile Chrome Android 120+
+Mobile Safari iOS 17+
+APPENDICE C: Risorse e Link Utili
+LLM - Groq (RACCOMANDATO)
+⭐ Groq Console: https://console.groq.com
+Documentazione: https://console.groq.com/docs
+Models: llama-3.3-70b-versatile (~900 tokens/sec)
+Free tier: 30 req/min, 6,000 req/day
+Pricing: https://groq.com/pricing (paid tier $0.59/1M tokens)
+Hosting - Render (RACCOMANDATO)
+⭐ Render.com: https://render.com
+Docs: https://docs.render.com
+WebSocket guide: https://render.com/docs/websockets
+Free tier: 750h/mese, WebSocket support
+Starter: $7/month, always-on, auto-scaling
+Audio/Musica Royalty-Free
+Pixabay Audio: https://pixabay.com/music
+FreePD: https://freepd.com
+Incompetech: https://incompetech.com
+Freesound: https://freesound.org
+Immagini Stock
+Unsplash API: https://unsplash.com/developers
+Pexels API: https://pexels.com/api
+Pixabay: https://pixabay.com/api
+Hosting Gratis/Freemium
+Frontend: Vercel, Netlify, Cloudflare Pages
+Backend: Railway.app, Render.com, Fly.io
+DB: MongoDB Atlas (512MB free)
+Redis: Upstash (10k commands/day free)
+
+
+--- FINE DOCUMENTO ---

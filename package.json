@@ -1,0 +1,25 @@
+{
+    "name": "quiz-game",
+    "version": "1.0.0",
+    "description": "Multiplayer Quiz Game Web App with AI-generated questions",
+    "scripts": {
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+        "dev:server": "cd server && npm run dev",
+        "dev:client": "cd client && npm run dev",
+        "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+        "docker:up": "docker-compose up -d",
+        "docker:down": "docker-compose down"
+    },
+    "keywords": [
+        "quiz",
+        "multiplayer",
+        "ai",
+        "websocket",
+        "kahoot"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^9.1.2"
+    }
+}

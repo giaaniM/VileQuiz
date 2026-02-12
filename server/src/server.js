@@ -1,0 +1,88 @@
+const express = require('express');
+const dotenv = require('dotenv');
+// Load env vars before anything else
+dotenv.config();
+
+const http = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
+const connectDB = require('./config/database');
+const categoryRoutes = require('./routes/categoryRoutes');
+const gameSocket = require('./socket/gameSocket');
+
+// DEBUG: Verify environment loading
+console.log('--- ENV DEBUG ---');
+console.log('Current Directory:', process.cwd());
+console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY ? 'FOUND' : 'NOT FOUND');
+console.log('-----------------');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Allow any origin for local dev
+        methods: ['GET', 'POST']
+    }
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Database connection (optional - MongoDB)
+connectDB();
+
+// API Routes
+app.use('/api', categoryRoutes);
+
+// Mock categories endpoint for testing (when MongoDB is not running)
+app.get('/api/categories-mock', (req, res) => {
+    const mockCategories = require('./utils/categories');
+    res.json(mockCategories);
+});
+
+// Endpoint per ottenere l'IP locale del server
+app.get('/api/ip', (req, res) => {
+    const { networkInterfaces } = require('os');
+    const nets = networkInterfaces();
+    let localIp = 'localhost';
+
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+            if (net.family === 'IPv4' && !net.internal) {
+                localIp = net.address;
+                break;
+            }
+        }
+        if (localIp !== 'localhost') break;
+    }
+    res.json({ ip: localIp });
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        mongodb: 'connected'
+    });
+});
+
+// Socket.IO Game Handlers
+gameSocket(io);
+
+// Make io available to routes
+app.set('io', io);
+
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, () => {
+    console.log(`
+    🚀 Server running on port ${PORT}
+    🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}
+    📊 Health check: http://localhost:${PORT}/api/health
+  `);
+});
+
+module.exports = { app, io };

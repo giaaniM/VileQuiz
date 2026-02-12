@@ -1,0 +1,241 @@
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { io } from 'socket.io-client';
+import PlayerCard from '../components/PlayerCard';
+
+function Lobby() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [socket, setSocket] = useState(null);
+    const [pin, setPin] = useState(null);
+    const [players, setPlayers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const category = location.state?.category;
+    const mode = location.state?.mode || 'single';
+    const [joinUrl, setJoinUrl] = useState('');
+
+    useEffect(() => {
+        fetch(import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/ip` : 'http://localhost:3001/api/ip')
+            .then(res => res.json())
+            .then(data => {
+                setJoinUrl(`http://${data.ip}:5173/play?pin=${pin}`);
+            })
+            .catch(() => {
+                setJoinUrl(`${window.location.protocol}//${window.location.hostname}:5173/play?pin=${pin}`);
+            });
+    }, [pin]);
+
+    useEffect(() => {
+        const socketUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+        const newSocket = io(socketUrl);
+        setSocket(newSocket);
+        return () => { newSocket.disconnect(); };
+    }, []);
+
+    useEffect(() => {
+        if (!socket || !category) return;
+
+        socket.emit('create-game', {
+            category: category.name || category,
+            mode: mode
+        });
+
+        socket.on('game-created', (data) => {
+            setPin(data.pin);
+            setLoading(false);
+        });
+
+        socket.on('game-started', (data) => {
+            navigate(`/host/game/${data.pin || pin}`);
+        });
+
+        socket.on('player-joined', (data) => {
+            setPlayers(prev => [...prev, data.player]);
+        });
+
+        socket.on('player-updated', (data) => {
+            setPlayers(data.players);
+        });
+
+        socket.on('error', (data) => {
+            setError(data.message);
+        });
+
+        return () => {
+            socket.off('game-created');
+            socket.off('player-joined');
+            socket.off('player-updated');
+            socket.off('error');
+        };
+    }, [socket, category]);
+
+    const handleStartGame = () => {
+        if (players.length < 1) {
+            alert('Serve almeno 1 giocatore per iniziare!');
+            return;
+        }
+        socket.emit('start-game', { pin });
+    };
+
+    if (!category) {
+        return (
+            <div className="min-h-screen bg-primary flex items-center justify-center">
+                <div className="text-white text-xl font-nunito">Categoria non selezionata</div>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-primary flex items-center justify-center">
+                <div className="text-white text-2xl font-nunito font-bold">Creando lobby...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-primary flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-white mb-4 font-nunito">⚠️ Errore</h2>
+                    <p className="text-white/80">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-8 relative overflow-hidden">
+
+            <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 h-[85vh]">
+
+                {/* LEFT COL: HERO & INFO */}
+                <div className="col-span-12 lg:col-span-7 flex flex-col justify-center gap-8">
+
+                    {/* Category Hero with Image */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="relative rounded-duo-lg overflow-hidden"
+                    >
+                        {/* Background Image */}
+                        {category?.icon_url ? (
+                            <div
+                                className="absolute inset-0 bg-cover bg-center"
+                                style={{ backgroundImage: `url(${category.icon_url})` }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/40" />
+                            </div>
+                        ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-duo-purple/30 via-primary-card to-primary" />
+                        )}
+
+                        {/* Content overlay */}
+                        <div className="relative z-10 p-10 pt-32">
+                            <div
+                                className={`inline-block px-5 py-2 rounded-full font-bold tracking-widest uppercase text-sm mb-4 border ${mode === 'mixed'
+                                        ? 'bg-duo-purple/20 text-duo-purple border-duo-purple/30'
+                                        : 'bg-duo-green/15 text-duo-green border-duo-green/30'
+                                    }`}
+                            >
+                                {mode === 'mixed' ? '🎲 Modalità Mista' : 'Categoria Scelta'}
+                            </div>
+                            <h1 className="text-7xl lg:text-8xl font-black text-white mb-4 leading-tight font-nunito drop-shadow-lg">
+                                {category?.name || category || 'VileQuiz'}
+                            </h1>
+                            {category?.description && (
+                                <p className="text-white/60 text-lg font-nunito max-w-lg">{category.description}</p>
+                            )}
+                            <div className="flex items-center gap-6 text-white/50 text-lg font-nunito mt-4">
+                                <span className="flex items-center gap-2">📚 10 Domande</span>
+                                <span className="flex items-center gap-2">⏱️ 15s / domanda</span>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* QR & PIN Block */}
+                    <div className="card-duo p-8 flex items-center gap-8">
+                        {joinUrl && (
+                            <div className="bg-white p-3 rounded-xl">
+                                <QRCodeSVG value={joinUrl} size={140} />
+                            </div>
+                        )}
+                        <div>
+                            <div className="text-white/40 mb-2 uppercase tracking-widest text-sm font-nunito">Codice Partita</div>
+                            <div className="text-7xl font-black text-duo-green tracking-widest font-nunito">
+                                {pin}
+                            </div>
+                            <div className="mt-2 text-white/30 font-nunito text-sm">
+                                Scansiona il QR o vai su <span className="text-white/60 font-bold block">{joinUrl?.replace('http://', '')}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* RIGHT COL: PLAYER LIST */}
+                <div className="col-span-12 lg:col-span-5 flex flex-col h-full">
+                    <div className="card-duo p-6 flex-grow flex flex-col">
+                        <div className="flex justify-between items-end mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white font-nunito">Lobby</h2>
+                                <p className="text-white/40 text-sm font-nunito">In attesa di sfidanti...</p>
+                            </div>
+                            <div className="text-4xl font-black text-duo-blue font-nunito">
+                                {players.length}<span className="text-lg text-white/30 font-normal">/50</span>
+                            </div>
+                        </div>
+
+                        {/* Player List */}
+                        <div className="flex-grow overflow-y-auto pr-2">
+                            {players.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-white/20">
+                                    <div className="text-6xl mb-4">👻</div>
+                                    <p className="font-nunito">La stanza è vuota...</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-3">
+                                    <AnimatePresence>
+                                        {players.map((player) => (
+                                            <motion.div
+                                                key={player.socketId}
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                                className="bg-white/5 p-3 rounded-duo flex items-center gap-4 border border-white/5"
+                                            >
+                                                <div className="text-3xl">{player.avatar}</div>
+                                                <div className="font-bold text-white text-lg truncate font-nunito">{player.nickname}</div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Start Button */}
+                        <div className="mt-6 pt-4 border-t border-white/10">
+                            <button
+                                onClick={handleStartGame}
+                                disabled={players.length < 1}
+                                className={`w-full py-5 text-xl font-extrabold rounded-duo transition-all font-nunito uppercase tracking-wide ${players.length >= 1
+                                    ? 'btn-duo btn-duo-green'
+                                    : 'bg-white/10 text-white/20 cursor-not-allowed'
+                                    }`}
+                            >
+                                {players.length < 1 ? 'In attesa di giocatori...' : '🚀 Avvia Partita'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+}
+
+export default Lobby;

@@ -1,0 +1,9 @@
+0000000000000000000000000000000000000000 f3525e5a03c78e4afe5b668943d880d117f0f124 vale <vale@vale.it> 1770733652 +0100	commit (initial): first commit
+f3525e5a03c78e4afe5b668943d880d117f0f124 d0eb050dbc41c41ca0ed55578bb01ddc5e6c66a8 vale <vale@vale.it> 1770737980 +0100	commit: update style
+d0eb050dbc41c41ca0ed55578bb01ddc5e6c66a8 3ccd9bfe1541d80269b27bf5c7a44bb97ba3e277 vale <vale@vale.it> 1770739672 +0100	commit: fix
+3ccd9bfe1541d80269b27bf5c7a44bb97ba3e277 add70c18d442ee7795be0de42459152a35ca7f19 vale <vale@vale.it> 1770744664 +0100	commit: top
+add70c18d442ee7795be0de42459152a35ca7f19 30b8fb47fa546b7c70238596c68482263ddbe846 vale <vale@vale.it> 1770758031 +0100	commit: vai
+30b8fb47fa546b7c70238596c68482263ddbe846 8a15c473b62c14da641203b3f7c9f0b3a0cac0b2 vale <vale@vale.it> 1770899718 +0100	commit: chore: VileQuiz branding update and anti-hallucination hardening
+8a15c473b62c14da641203b3f7c9f0b3a0cac0b2 4063f78230caa52c68e4af4f92d7e80da642ec33 vale <vale@vale.it> 1770900084 +0100	commit: feat: Restore robust retry logic in GroqService withPool management
+4063f78230caa52c68e4af4f92d7e80da642ec33 0000000000000000000000000000000000000000 vale <vale@vale.it> 1770900249 +0100	Branch: renamed refs/heads/master to refs/heads/main
+0000000000000000000000000000000000000000 4063f78230caa52c68e4af4f92d7e80da642ec33 vale <vale@vale.it> 1770900249 +0100	Branch: renamed refs/heads/master to refs/heads/main
