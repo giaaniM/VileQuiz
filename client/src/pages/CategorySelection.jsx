@@ -49,7 +49,7 @@ function CategorySelection() {
 
     if (error) {
         return (
-            <div className="min-h-full bg-primary flex items-center justify-center">
+            <div className="min-h-screen bg-primary flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-white mb-4">⚠️ Errore</h2>
                     <p className="text-white/80">{error}</p>
@@ -59,7 +59,7 @@ function CategorySelection() {
     }
 
     return (
-        <div className="min-h-full bg-primary">
+        <div className="min-h-screen bg-primary">
             {/* Top Bar */}
             <div className="bg-primary-light border-b border-white/5 px-6 py-4">
                 <span className="text-duo-green font-nunito font-black text-xl">VileQuiz</span>

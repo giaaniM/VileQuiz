@@ -78,7 +78,7 @@ function Join() {
     // STEP 1: PIN Input
     if (step === 'pin') {
         return (
-            <div className="min-h-full bg-primary flex flex-col">
+            <div className="min-h-screen bg-primary flex flex-col">
                 <div className="bg-primary-light border-b border-white/5 px-6 py-4">
                     <span className="text-duo-green font-nunito font-black text-xl">VileQuiz</span>
                 </div>
@@ -131,7 +131,7 @@ function Join() {
     // STEP 2: Nickname Form
     if (step === 'nickname') {
         return (
-            <div className="min-h-full bg-primary flex flex-col">
+            <div className="min-h-screen bg-primary flex flex-col">
                 <div className="bg-primary-light border-b border-white/5 px-6 py-4">
                     <span className="text-duo-green font-nunito font-black text-xl">VileQuiz</span>
                 </div>
@@ -182,7 +182,7 @@ function Join() {
 
     // STEP 3: Waiting Lobby
     return (
-        <div className="min-h-full bg-primary">
+        <div className="min-h-screen bg-primary">
             <div className="bg-primary-light border-b border-white/5 px-6 py-4">
                 <span className="text-duo-green font-nunito font-black text-xl">VileQuiz</span>
             </div>

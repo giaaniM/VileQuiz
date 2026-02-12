@@ -23,7 +23,7 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
     ];
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4 flex flex-col h-full">
+        <div className="w-full max-w-6xl mx-auto p-4 flex flex-col h-screen max-h-[90vh]">
             {/* Header: Progress & Timer */}
             <div className="flex justify-between items-center mb-2 md:mb-4">
                 <div className="card-duo px-4 py-2 md:px-6 md:py-3">
