@@ -107,9 +107,9 @@ function Lobby() {
     }
 
     return (
-        <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4 md:p-8 relative">
 
-            <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 h-[85vh]">
+            <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 min-h-[85vh] h-auto">
 
                 {/* LEFT COL: HERO & INFO */}
                 <div className="col-span-12 md:col-span-7 flex flex-col justify-center gap-8">
