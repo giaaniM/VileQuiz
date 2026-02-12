@@ -42,7 +42,7 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="card-duo relative overflow-hidden mb-2 md:mb-4 flex-grow flex flex-col min-h-[180px] md:min-h-[250px]"
+                className="card-duo relative overflow-hidden mb-2 md:mb-4 flex-grow flex flex-col"
             >
                 {/* Background Image Header */}
                 {question.categoryImage && (
@@ -91,7 +91,7 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`${optionsConfig[index].color} rounded-duo p-3 md:p-5 flex items-center shadow-duo border-b-4 ${optionsConfig[index].darkBorder}`}
+                        className={`${optionsConfig[index].color} rounded-duo p-4 md:p-6 flex items-center shadow-duo border-b-4 ${optionsConfig[index].darkBorder}`}
                     >
                         <div className="flex items-center gap-3 md:gap-5 w-full">
                             <div className="w-10 h-10 md:w-14 md:h-14 bg-black/20 rounded-full flex items-center justify-center text-lg md:text-2xl text-white font-black font-nunito flex-shrink-0">
