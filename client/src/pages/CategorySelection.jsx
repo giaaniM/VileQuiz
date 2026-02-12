@@ -119,7 +119,7 @@ function CategorySelection() {
 
                 {/* Categories Grid */}
                 {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                         {[...Array(10)].map((_, i) => (
                             <div
                                 key={i}
@@ -128,7 +128,7 @@ function CategorySelection() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                         {categories.map((category) => (
                             <CategoryCard
                                 key={category._id}

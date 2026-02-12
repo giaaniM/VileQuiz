@@ -112,7 +112,7 @@ function Lobby() {
             <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 h-[85vh]">
 
                 {/* LEFT COL: HERO & INFO */}
-                <div className="col-span-12 lg:col-span-7 flex flex-col justify-center gap-8">
+                <div className="col-span-12 md:col-span-7 flex flex-col justify-center gap-8">
 
                     {/* Category Hero with Image */}
                     <motion.div
@@ -176,7 +176,7 @@ function Lobby() {
                 </div>
 
                 {/* RIGHT COL: PLAYER LIST */}
-                <div className="col-span-12 lg:col-span-5 flex flex-col h-full">
+                <div className="col-span-12 md:col-span-5 flex flex-col h-full">
                     <div className="card-duo p-6 flex-grow flex flex-col">
                         <div className="flex justify-between items-end mb-6 pb-4 border-b border-white/10">
                             <div>
