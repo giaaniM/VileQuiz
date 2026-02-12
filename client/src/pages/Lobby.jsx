@@ -19,14 +19,12 @@ function Lobby() {
     const [joinUrl, setJoinUrl] = useState('');
 
     useEffect(() => {
-        fetch('/api/ip')
-            .then(res => res.json())
-            .then(data => {
-                setJoinUrl(`http://${data.ip}:5173/play?pin=${pin}`);
-            })
-            .catch(() => {
-                setJoinUrl(`${window.location.protocol}//${window.location.hostname}:5173/play?pin=${pin}`);
-            });
+        // In production (Render), we use the current domain without port 5173
+        const baseUrl = window.location.port === '5173'
+            ? `${window.location.protocol}//${window.location.hostname}:5173`
+            : window.location.origin;
+
+        setJoinUrl(`${baseUrl}/play?pin=${pin}`);
     }, [pin]);
 
     useEffect(() => {
