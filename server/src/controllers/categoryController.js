@@ -6,11 +6,23 @@ const Category = require('../models/Category');
  */
 const getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.find().sort({ name: 1 });
+        let categories = [];
+        // Try fetching from MongoDB if connected
+        if (require('mongoose').connection.readyState === 1) {
+            categories = await Category.find().sort({ name: 1 });
+        }
+
+        // Fallback to mock data if DB is empty or not connected
+        if (!categories || categories.length === 0) {
+            console.log('⚠️ Using mock categories (DB empty or disconnected)');
+            categories = require('../utils/categories');
+        }
+
         res.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
-        res.status(500).json({ error: 'Failed to fetch categories' });
+        // Fallback on error too
+        res.json(require('../utils/categories'));
     }
 };
 

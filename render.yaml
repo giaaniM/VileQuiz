@@ -12,8 +12,6 @@ services:
         value: llama-3.3-70b-versatile
       - key: GROQ_API_KEY
         sync: false
-      - key: MONGODB_URI
-        sync: false
       - key: REDIS_URL
         fromService:
           type: redis
