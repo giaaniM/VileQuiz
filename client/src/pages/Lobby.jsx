@@ -110,9 +110,9 @@ function Lobby() {
     }
 
     return (
-        <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4 md:p-8 relative">
+        <div className="bg-primary flex flex-col items-center justify-center p-4 md:p-8 relative" style={{ minHeight: 'var(--screen-h)' }}>
 
-            <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 min-h-[85vh] h-auto">
+            <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 h-auto">
 
                 {/* LEFT COL: HERO & INFO */}
                 <div className="col-span-12 md:col-span-7 flex flex-col justify-start md:justify-center gap-4">
