@@ -112,13 +112,14 @@ function Lobby() {
             <div className="max-w-[1600px] w-full mx-auto relative z-10 grid grid-cols-12 gap-8 min-h-[85vh] h-auto">
 
                 {/* LEFT COL: HERO & INFO */}
-                <div className="col-span-12 md:col-span-7 flex flex-col justify-center gap-8">
+                {/* LEFT COL: HERO & INFO */}
+                <div className="col-span-12 md:col-span-7 flex flex-col justify-start md:justify-center gap-4">
 
                     {/* Category Hero with Image */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="relative rounded-duo-lg overflow-hidden"
+                        className="relative rounded-duo-lg overflow-hidden shrink-0"
                     >
                         {/* Background Image */}
                         {category?.icon_url ? (
@@ -133,22 +134,22 @@ function Lobby() {
                         )}
 
                         {/* Content overlay */}
-                        <div className="relative z-10 p-10 pt-32">
+                        <div className="relative z-10 p-6 pt-20 md:p-8 md:pt-24">
                             <div
-                                className={`inline-block px-5 py-2 rounded-full font-bold tracking-widest uppercase text-sm mb-4 border ${mode === 'mixed'
+                                className={`inline-block px-3 py-1 md:px-4 md:py-2 rounded-full font-bold tracking-widest uppercase text-xs mb-2 border ${mode === 'mixed'
                                     ? 'bg-duo-purple/20 text-duo-purple border-duo-purple/30'
                                     : 'bg-duo-green/15 text-duo-green border-duo-green/30'
                                     }`}
                             >
                                 {mode === 'mixed' ? '🎲 Modalità Mista' : 'Categoria Scelta'}
                             </div>
-                            <h1 className="text-7xl lg:text-8xl font-black text-white mb-4 leading-tight font-nunito drop-shadow-lg">
+                            <h1 className="text-4xl md:text-6xl font-black text-white mb-2 leading-tight font-nunito drop-shadow-lg break-words">
                                 {category?.name || category || 'VileQuiz'}
                             </h1>
                             {category?.description && (
-                                <p className="text-white/60 text-lg font-nunito max-w-lg">{category.description}</p>
+                                <p className="text-white/60 text-xs md:text-base font-nunito max-w-lg leading-snug">{category.description}</p>
                             )}
-                            <div className="flex items-center gap-6 text-white/50 text-lg font-nunito mt-4">
+                            <div className="flex items-center gap-4 text-white/50 text-xs md:text-sm font-nunito mt-2">
                                 <span className="flex items-center gap-2">📚 10 Domande</span>
                                 <span className="flex items-center gap-2">⏱️ 15s / domanda</span>
                             </div>
@@ -156,19 +157,19 @@ function Lobby() {
                     </motion.div>
 
                     {/* QR & PIN Block */}
-                    <div className="card-duo p-8 flex items-center gap-8">
+                    <div className="card-duo p-4 md:p-6 flex items-center gap-4 shrink-0">
                         {joinUrl && (
-                            <div className="bg-white p-3 rounded-xl">
-                                <QRCodeSVG value={joinUrl} size={140} />
+                            <div className="bg-white p-2 rounded-xl hidden sm:block shrink-0">
+                                <QRCodeSVG value={joinUrl} size={80} className="md:w-[100px] md:h-[100px]" />
                             </div>
                         )}
-                        <div>
-                            <div className="text-white/40 mb-2 uppercase tracking-widest text-sm font-nunito">Codice Partita</div>
-                            <div className="text-7xl font-black text-duo-green tracking-widest font-nunito">
+                        <div className="min-w-0 flex-1">
+                            <div className="text-white/40 mb-1 uppercase tracking-widest text-[10px] md:text-xs font-nunito">Codice Partita</div>
+                            <div className="text-5xl md:text-6xl font-black text-duo-green tracking-widest font-nunito truncate">
                                 {pin}
                             </div>
-                            <div className="mt-2 text-white/30 font-nunito text-sm">
-                                Scansiona il QR o vai su <span className="text-white/60 font-bold block">{joinUrl?.replace('http://', '')}</span>
+                            <div className="mt-1 text-white/30 font-nunito text-[10px] md:text-xs truncate">
+                                Scansiona o vai su <span className="text-white/60 font-bold">{joinUrl?.replace('http://', '').replace('https://', '').split('/')[0]}</span>
                             </div>
                         </div>
                     </div>
