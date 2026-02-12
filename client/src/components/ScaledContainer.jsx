@@ -1,53 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 /**
- * ScaledContainer - Wraps content and scales it down to fit the viewport.
- * On small viewports (e.g., TV at 1024x600), the entire UI is scaled down proportionally.
- * On normal/large viewports, no scaling is applied.
- *
- * Key: children should use `h-full` instead of `h-screen` to fill this container.
+ * ScaledContainer - Applies CSS zoom to its children so everything
+ * scales proportionally on small-height viewports (e.g., TV at 600px).
+ * 
+ * Uses CSS `zoom` which affects actual layout (unlike CSS transform).
+ * Reference height is 768px — anything shorter gets zoomed out.
  */
 function ScaledContainer({ children, referenceHeight = 768 }) {
-    const [scale, setScale] = useState(1);
-    const [dimensions, setDimensions] = useState({ w: '100vw', h: '100vh' });
-
     useEffect(() => {
-        const updateScale = () => {
+        const updateZoom = () => {
             const vh = window.innerHeight;
-            const vw = window.innerWidth;
-            const newScale = Math.min(1, vh / referenceHeight);
-            setScale(newScale);
-
-            if (newScale < 1) {
-                // Inner div must be larger so that when scaled, it fills the viewport
-                setDimensions({
-                    w: `${vw / newScale}px`,
-                    h: `${vh / newScale}px`
-                });
-            } else {
-                setDimensions({ w: '100vw', h: '100vh' });
-            }
+            const zoomLevel = Math.min(1, vh / referenceHeight);
+            document.documentElement.style.zoom = zoomLevel;
         };
 
-        updateScale();
-        window.addEventListener('resize', updateScale);
-        return () => window.removeEventListener('resize', updateScale);
+        updateZoom();
+        window.addEventListener('resize', updateZoom);
+        return () => {
+            window.removeEventListener('resize', updateZoom);
+            document.documentElement.style.zoom = '';
+        };
     }, [referenceHeight]);
 
-    return (
-        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
-            <div
-                style={{
-                    width: dimensions.w,
-                    height: dimensions.h,
-                    transform: scale < 1 ? `scale(${scale})` : 'none',
-                    transformOrigin: 'top left',
-                }}
-            >
-                {children}
-            </div>
-        </div>
-    );
+    return children;
 }
 
 export default ScaledContainer;

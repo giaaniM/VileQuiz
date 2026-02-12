@@ -9,7 +9,7 @@ import ScaledContainer from './components/ScaledContainer';
 
 function Home() {
   return (
-    <div className="min-h-full bg-primary flex flex-col">
+    <div className="min-h-screen bg-primary flex flex-col">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-primary-light border-b border-white/5">
         <span className="text-duo-green font-nunito font-black text-2xl tracking-tight">VileQuiz</span>

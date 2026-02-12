@@ -113,7 +113,7 @@ function GameRoom() {
     ];
 
     return (
-        <div className="h-full bg-primary overflow-hidden relative">
+        <div className="min-h-screen bg-primary overflow-hidden relative">
             {/* EXIT BUTTON */}
             <button
                 onClick={handleExitGame}
@@ -134,7 +134,7 @@ function GameRoom() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center h-full text-white"
+                        className="flex flex-col items-center justify-center h-screen text-white"
                     >
                         <div className="text-8xl mb-8 animate-bounce">🧠</div>
                         <h1 className="text-5xl font-black mb-6 font-nunito">
@@ -150,7 +150,7 @@ function GameRoom() {
                 {status === 'countdown' && (
                     <motion.div
                         key="countdown"
-                        className="flex items-center justify-center h-full text-white"
+                        className="flex items-center justify-center h-screen text-white"
                     >
                         <motion.div
                             key={countdown}
@@ -172,7 +172,7 @@ function GameRoom() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.1 }}
-                        className="flex items-center justify-center h-full p-8"
+                        className="flex items-center justify-center h-screen p-8"
                     >
                         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-primary-card/50 backdrop-blur-xl p-8 rounded-duo-xl border border-white/10 shadow-2xl relative overflow-hidden">
                             {/* Decorative Background Blob */}
@@ -255,7 +255,7 @@ function GameRoom() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center h-full text-white px-8 py-6"
+                        className="flex flex-col items-center justify-center h-screen text-white px-8 py-6"
                     >
                         <h2 className="text-4xl font-black mb-4 uppercase tracking-widest text-duo-blue font-nunito">Risultati</h2>
 
@@ -324,7 +324,7 @@ function GameRoom() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center h-full text-white text-center"
+                        className="flex flex-col items-center justify-center h-screen text-white text-center"
                     >
                         <div className="text-8xl mb-8 animate-bounce">🧮</div>
                         <h2 className="text-5xl font-black text-white font-nunito animate-pulse">
@@ -340,7 +340,7 @@ function GameRoom() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, x: -100 }}
-                        className="flex flex-col items-center justify-center h-full text-white px-6"
+                        className="flex flex-col items-center justify-center h-screen text-white px-6"
                     >
                         <h2 className="text-5xl font-black mb-12 text-duo-yellow font-nunito uppercase tracking-wider">
                             Classifica Provvisoria
@@ -383,7 +383,7 @@ function GameRoom() {
                 {status === 'finished' && (
                     <motion.div
                         key="finished"
-                        className="flex flex-col items-center justify-center h-full text-white px-6"
+                        className="flex flex-col items-center justify-center h-screen text-white px-6"
                     >
                         <h1 className="text-7xl font-black mb-10 text-duo-yellow font-nunito">
                             🏆 PODIO 🏆
