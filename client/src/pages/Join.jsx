@@ -17,7 +17,7 @@ function Join() {
     const [category, setCategory] = useState(null);
 
     useEffect(() => {
-        const socketUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = '/'; // Relative path
         const newSocket = io(socketUrl);
         setSocket(newSocket);
 

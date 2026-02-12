@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AudioManager from '../services/AudioManager';
 
 // URL del backend
-const SOCKET_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+const SOCKET_URL = '/'; // Relative path
 
 function PlayerController() {
     const navigate = useNavigate();

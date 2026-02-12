@@ -19,7 +19,7 @@ function Lobby() {
     const [joinUrl, setJoinUrl] = useState('');
 
     useEffect(() => {
-        fetch(import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/ip` : 'http://localhost:3001/api/ip')
+        fetch('/api/ip')
             .then(res => res.json())
             .then(data => {
                 setJoinUrl(`http://${data.ip}:5173/play?pin=${pin}`);
@@ -30,7 +30,7 @@ function Lobby() {
     }, [pin]);
 
     useEffect(() => {
-        const socketUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = '/'; // Relative path for socket.io
         const newSocket = io(socketUrl);
         setSocket(newSocket);
         return () => { newSocket.disconnect(); };
@@ -138,8 +138,8 @@ function Lobby() {
                         <div className="relative z-10 p-10 pt-32">
                             <div
                                 className={`inline-block px-5 py-2 rounded-full font-bold tracking-widest uppercase text-sm mb-4 border ${mode === 'mixed'
-                                        ? 'bg-duo-purple/20 text-duo-purple border-duo-purple/30'
-                                        : 'bg-duo-green/15 text-duo-green border-duo-green/30'
+                                    ? 'bg-duo-purple/20 text-duo-purple border-duo-purple/30'
+                                    : 'bg-duo-green/15 text-duo-green border-duo-green/30'
                                     }`}
                             >
                                 {mode === 'mixed' ? '🎲 Modalità Mista' : 'Categoria Scelta'}

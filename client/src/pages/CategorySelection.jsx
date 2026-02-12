@@ -14,7 +14,7 @@ function CategorySelection() {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/categories-mock');
+            const response = await fetch('/api/categories-mock');
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }

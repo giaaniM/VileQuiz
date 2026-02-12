@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import QuestionDisplay from '../components/QuestionDisplay';
 import AudioManager from '../services/AudioManager';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+const SOCKET_URL = '/'; // Relative path
 
 function GameRoom() {
     const { pin } = useParams();
