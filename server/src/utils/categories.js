@@ -3,6 +3,22 @@
 
 const categories = [
     {
+        _id: '16',
+        name: 'Sanremo',
+        description: 'Storia, canzoni e conduttori del Festival della Canzone Italiana.',
+        icon_url: '/images/sanremo.png',
+        difficulty_range: ['easy', 'medium'],
+        isSpecial: true
+    },
+    {
+        _id: '17',
+        name: 'Bridgerton',
+        description: 'Intrighi, amori e scandali dell\'alta società londinese firmata Netflix.',
+        icon_url: '/images/bridgerton.png',
+        difficulty_range: ['easy', 'medium'],
+        isSpecial: true
+    },
+    {
         _id: '1',
         name: 'Geografia',
         description: 'Esplora il mondo con quiz su capitali, monumenti e curiosità geografiche',

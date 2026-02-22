@@ -1,4 +1,6 @@
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 // Sub-temi mainstream e Italia-centrici per varietà senza essere troppo nicchia
 const SUB_TOPICS = {
@@ -65,11 +67,21 @@ const SUB_TOPICS = {
         'record del mondo animale', 'stagioni e clima', 'alberi e foreste',
         'vulcani e terremoti in Italia', 'animali in via di estinzione famosi', 'oceani e mari',
     ],
+    'Sanremo': [
+        'vincitori storici', 'conduttori storici', 'canzoni iconiche', 'curiosità e record',
+        'cantanti con più vittorie', 'il teatro Ariston', 'vallette e co-conduttori',
+        'canzoni arrivate ultime ma poi diventate hit', 'ospiti internazionali'
+    ],
+    'Bridgerton': [
+        'la famiglia Bridgerton', 'i Featherington', 'Lady Whistledown', 'la Regina Carlotta',
+        'il Duca di Hastings col suo cucchiaio', 'Anthony e Kate', 'Colin e Penelope e il carretto',
+        'balli della Reggenza', 'Lady Danbury', 'curiosità dal set e dai libri'
+    ],
 };
 
 // Categorie che devono avere un focus italiano nelle domande
 const ITALY_FOCUSED_CATEGORIES = new Set([
-    'Geografia', 'Storia', 'Pop Culture', 'Cinema', 'Musica', 'Sport', 'Arte'
+    'Geografia', 'Storia', 'Pop Culture', 'Cinema', 'Musica', 'Sport', 'Arte', 'Sanremo'
 ]);
 
 class GroqService {
@@ -82,10 +94,31 @@ class GroqService {
 
         this.apiKey = process.env.GROQ_API_KEY || HARDCODED_KEY;
         this.apiUrl = process.env.GROQ_URL || 'https://api.groq.com/openai/v1/chat/completions';
-        this.model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-        // Storico domande per evitare ripetizioni (ultime N domande)
-        this.questionHistory = [];
-        this.MAX_HISTORY = 200;
+        this.model = process.env.GROQ_MODEL || 'llama3-70b-8192'; // Using stricter model to reduce hallucinations
+
+        // Storico domande persistente
+        this.MAX_HISTORY = 400; // Increased history size
+        this.historyFilePath = path.join(__dirname, '..', 'data', 'history.json');
+
+        // Assicurati che la cartella data esista
+        const dir = path.dirname(this.historyFilePath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+
+        // Carica lo storico precedente o inizializza
+        if (fs.existsSync(this.historyFilePath)) {
+            try {
+                const data = fs.readFileSync(this.historyFilePath, 'utf-8');
+                this.questionHistory = JSON.parse(data);
+                console.log(`📜 Caricato storico di ${this.questionHistory.length} domande dal disco.`);
+            } catch (e) {
+                console.error('⚠️ Errore lettura storico:', e.message);
+                this.questionHistory = [];
+            }
+        } else {
+            this.questionHistory = [];
+        }
 
         if (!this.apiKey) {
             console.warn('⚠️ ATTENZIONE: Nessuna API Key trovata (né ENV né Hardcoded)!');
@@ -115,7 +148,7 @@ class GroqService {
     }
 
     /**
-     * Salva le domande nello storico
+     * Salva le domande nello storico e su disco
      */
     _saveToHistory(questions, category) {
         for (const q of questions) {
@@ -128,6 +161,13 @@ class GroqService {
         // Tronca se troppo lungo
         if (this.questionHistory.length > this.MAX_HISTORY) {
             this.questionHistory = this.questionHistory.slice(-this.MAX_HISTORY);
+        }
+
+        // Persisti su disco
+        try {
+            fs.writeFileSync(this.historyFilePath, JSON.stringify(this.questionHistory, null, 2));
+        } catch (e) {
+            console.error('⚠️ Errore salvataggio storico:', e.message);
         }
     }
 
@@ -150,7 +190,7 @@ class GroqService {
       
       Verifica OGNI domanda qui sotto. Per ciascuna, controlla:
       1. La domanda è basata su fatti REALI e verificabili?
-      2. La risposta indicata come corretta È EFFETTIVAMENTE CORRETTA?
+      2. La risposta indicata come corretta È L'UNICA RISPOSTA CORRETTA POSSIBILE?
       3. Le date menzionate sono giuste?
       4. I nomi di persone, film, canzoni, eventi ESISTONO REALMENTE?
       5. Le attribuzioni sono corrette? (es. regista giusto per quel film, autore giusto per quella canzone)
@@ -159,10 +199,11 @@ class GroqService {
       ${JSON.stringify(questionsForVerification, null, 2)}
       
       SEGNALA COME INVALIDA ("valid": false) qualsiasi domanda che:
+      - È VAGA O AMBIGUA (es. "Quale di queste canzoni ha partecipato a Sanremo?" se le opzioni includono PIÙ di una canzone che ha partecipato negli anni). DEVE avere UNA SOLA risposta giusta.
       - Menziona persone, canzoni, film, libri, eventi che NON ESISTONO
-      - Ha la risposta corretta SBAGLIATA (es. attribuisce un'opera all'autore sbagliato)
-      - Contiene date ERRATE (es. anno di uscita sbagliato di un film/canzone)
-      - Combina fatti reali in modo sbagliato (es. film giusto ma regista sbagliato)
+      - Ha la risposta corretta SBAGLIATA
+      - Contiene date ERRATE (es. anno di uscita sbagliato)
+      - Combina fatti reali in modo sbagliato
       - Ti sembra anche solo DUBBIA o non sei sicuro al 100% — nel dubbio, invalida
       
       Restituisci SOLO un array JSON: [{"id": 0, "valid": true}, {"id": 1, "valid": false}]
@@ -257,14 +298,18 @@ class GroqService {
       Regole:
       - "options" deve contenere esattamente 4 stringhe.
       - "correctAnswer" deve essere l'indice (0-3) della risposta corretta nell'array "options".
-      - Le domande devono essere di CULTURA POPOLARE, cose che la gente normale conosce.
-      - NON fare domande troppo specifiche, tecniche o accademiche.
-      - ⚠️ REGOLA CRITICA ANTI-ERRORI:
-        * NON combinare più di 2 dettagli specifici in una domanda (es. NO anno + regista + attori + titolo).
-        * NON mettere date specifiche (anni) nelle domande a meno che tu sia ASSOLUTAMENTE CERTO.
-        * Preferisci domande semplici tipo "Quale di questi è...?" o "Chi ha cantato...?" con UN SOLO fatto da verificare.
-        * Se non sei SICURO AL 100% che un fatto sia corretto, NON includerlo nella domanda.
-        * NON INVENTARE NULLA. Zero tolleranza per fatti inventati.
+      - Le domande devono essere SORPRENDENTI e CURIOSITÀ VERE. Evita come la peste le domande banali e ultra-scontate (es. "Chi ha dipinto la Gioconda?" o "In che anno è nato il Festival di Sanremo?").
+      - NON farti venire in mente la prima cosa statistica, cerca aneddoti interessanti!
+      - ⚠️ REGOLA CRITICA ANTI-ERRORI E ANTI-ALLUCINAZIONI:
+        * SEI SEVERAMENTE VIETATO DALL'INVENTARE FATTI O ASSOCIARE CANZONI/FILM AD AUTORI SBAGLIATI.
+        * EVITA AMBIGUITÀ: La domanda NON DEVE essere generica (es. SBAGLIATO: "Quale canzone ha partecipato a Sanremo?", GIUSTO: "Quale brano ha vinto Sanremo nel 1999?"). La risposta giusta DEVE ESSERE L'UNICA ASSOLUTAMENTE CORRETTA. Le altre tre DEBBONO essere totalmente false in quel contesto.
+        * CONGRUENZA GRAMMATICALE: Usa termini neutri e corretti. Non chiedere "Quale gruppo..." se la risposta corretta è un cantante solista. Usa "Quale artista/cantante...".
+        * Se non sei ASSOLUTAMENTE CERTO AL 1000% che la risposta corretta sia tale, non fare la domanda.
+        * Se non ti vengono in mente ${count} fatti assolutamente verificati, REAGISCI GENERANDO MENO DOMANDE. È meglio restituire 3 domande vere e originali che 10 inventate.
+        * NON mettere date precise (es. anni esatti) a meno che tu non lo sappia con assoluta certezza enciclopedica.
+        * Evita domande del tipo "Quale di questi NON è..." perché tendono a creare confusione.
+        * Mettici tantissima creatività e ricerca del dettaglio ma moltissima precisione enciclopedica sui fatti.
+        * La riposta corretta nelle options DEVE ASSOLUTAMENTE essere vera. Zero tolleranza per errori.
       - Lingua: Italiano.
       - ID Sessione: ${Date.now()}-${Math.random().toString(36).slice(2)}
     `;
@@ -276,14 +321,14 @@ class GroqService {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Sei un autore di quiz televisivi per famiglie. Crei domande divertenti e accessibili, come quelle de "L\'Eredità" o "Chi vuol essere milionario". Le domande devono essere di cultura popolare, cose che la gente normale conosce. NON fare domande troppo specifiche o accademiche. Rispondi sempre e solo con JSON array valido.'
+                        content: 'Sei un brillante autore di quiz. Sorprendi i giocatori con curiosità esatte ma non scontate. Evita sempre le prime 3 domande ovvie che ti verrebbero in mente per un argomento. Rispondi sempre e solo con JSON array valido.'
                     },
                     {
                         role: 'user',
                         content: prompt
                     }
                 ],
-                temperature: 0.5,
+                temperature: 0.5, // Increased for variety
                 max_tokens: 3500
             },
             {
@@ -438,15 +483,17 @@ class GroqService {
       - "options" deve contenere esattamente 4 stringhe.
       - "correctAnswer" deve essere l'indice (0-3) della risposta corretta.
       - "category" deve essere il nome della categoria SENZA lo spunto tra parentesi.
-      - DIFFICOLTÀ PROGRESSIVA: la prima domanda deve essere accessibile (ma mai banale o ovvia), l'ultima la più difficile.
-        NON fare domande troppo facili tipo "qual è la capitale dell'Italia" — anche le domande facili devono far pensare un attimo.
-      - Le domande devono essere di CULTURA POPOLARE, cose che la gente normale conosce.
-      - NON fare domande troppo specifiche, tecniche o accademiche.
-      - ⚠️ REGOLA CRITICA ANTI-ERRORI:
-        * NON combinare più di 2 dettagli specifici in una domanda.
-        * NON mettere date specifiche a meno che tu sia ASSOLUTAMENTE CERTO.
-        * Preferisci strutture semplici: "Quale di questi è...?", "Chi ha cantato...?".
-        * NON INVENTARE NULLA. Se non sei sicuro, non includerlo.
+      - DIFFICOLTÀ PROGRESSIVA: la prima domanda deve essere accessibile, l'ultima la più difficile.
+      - Le domande devono essere SORPRENDENTI e CURIOSITÀ VERE. Evita come la peste le domande banali e ultra-scontate pertinenti alla categoria.
+      - NON farti venire in mente la prima cosa statistica, cerca aneddoti interessanti o fatti divertenti/sconosciuti ma veri.
+      - ⚠️ REGOLA CRITICA ANTI-ERRORI E ANTI-ALLUCINAZIONI:
+        * SEI SEVERAMENTE VIETATO DALL'INVENTARE FATTI. La correttezza enciclopedica è l'unica cosa che conta.
+        * EVITA AMBIGUITÀ: La domanda NON DEVE essere generica (es. SBAGLIATO: "Quale canzone ha partecipato a Sanremo?", GIUSTO: "Quale brano cantato dai Jalisse ha vinto Sanremo?"). La risposta giusta DEVE ESSERE L'UNICA ASSOLUTAMENTE CORRETTA tra le 4 opzioni. Le altre 3 devono essere per forza sbagliate in quel contesto referenziale.
+        * CONGRUENZA GRAMMATICALE: Non chiedere "Quale gruppo..." se la risposta corretta è un cantante solista come Celentano, o viceversa. Usa sempre terminologia corretta rispetto alla risposta ("artista/cantante/band").
+        * Zero tolleranza per fatti inventati o associazioni "plausibili ma false" (es. attribuire una canzone all'artista sbagliato).
+        * Se hai il 99% di certezza e non il 100%, CREA UN'ALTRA DOMANDA.
+        * Tutte e tre le risposte sbagliate devono essere plausibili ma indiscutibilmente FATTUALMENTE SBAGLIATE.
+        * La riposta corretta DEVE essere un FATTO REALE, VERO E NOTO (ma magari curioso).
       - Lingua: Italiano.
       - ID Sessione: ${Date.now()}-${Math.random().toString(36).slice(2)}
     `;
@@ -459,14 +506,14 @@ class GroqService {
                         messages: [
                             {
                                 role: 'system',
-                                content: 'Sei un autore di quiz televisivi per famiglie. Crei domande divertenti e accessibili. Le domande devono essere di cultura popolare. NON fare domande troppo specifiche o accademiche. Rispondi sempre e solo con JSON array valido.'
+                                content: 'Sei un brillante autore di quiz. Sorprendi i giocatori con curiosità esatte ma non scontate. Evita sempre le prime 3 domande ovvie che ti verrebbero in mente per un argomento. Rispondi sempre e solo con JSON array valido.'
                             },
                             {
                                 role: 'user',
                                 content: prompt
                             }
                         ],
-                        temperature: 0.5,
+                        temperature: 0.5, // Increased for variety
                         max_tokens: 3000
                     },
                     {

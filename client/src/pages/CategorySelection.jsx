@@ -80,7 +80,7 @@ function CategorySelection() {
                 <div className="mb-8">
                     <button
                         onClick={handleMixedMode}
-                        className="w-full relative overflow-hidden rounded-duo-lg group h-40 transition-transform hover:scale-[1.02] active:scale-100 transform-gpu backface-hidden"
+                        className="w-full relative overflow-hidden rounded-duo-lg group h-40 transition-all hover:-translate-y-1 shadow-md hover:shadow-xl"
                     >
                         {/* Background Image */}
                         <div
@@ -111,13 +111,8 @@ function CategorySelection() {
                 </div>
 
                 {/* Divider */}
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="flex-grow h-px bg-white/10"></div>
-                    <span className="text-white/30 text-sm font-bold uppercase tracking-widest">oppure scegli un tema</span>
-                    <div className="flex-grow h-px bg-white/10"></div>
-                </div>
 
-                {/* Categories Grid */}
+                {/* Standard Categories Grid */}
                 {loading ? (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                         {[...Array(10)].map((_, i) => (
@@ -128,15 +123,48 @@ function CategorySelection() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                        {categories.map((category) => (
-                            <CategoryCard
-                                key={category._id}
-                                category={category}
-                                onSelect={handleCategorySelect}
-                            />
-                        ))}
-                    </div>
+                    <>
+                        {/* Special Categories Divider */}
+                        {categories.some(c => c.isSpecial) && (
+                            <>
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="flex-grow h-px bg-white/10"></div>
+                                    <span className="text-duo-purple font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                                        <span>✨</span> Categorie Speciali <span>✨</span>
+                                    </span>
+                                    <div className="flex-grow h-px bg-white/10"></div>
+                                </div>
+
+                                {/* Special Categories Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+                                    {categories.filter(c => c.isSpecial).map((category) => (
+                                        <CategoryCard
+                                            key={category._id}
+                                            category={category}
+                                            onSelect={handleCategorySelect}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {/* Standard Categories Divider */}
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="flex-grow h-px bg-white/10"></div>
+                            <span className="text-white/30 text-sm font-bold uppercase tracking-widest">oppure scegli un tema classico</span>
+                            <div className="flex-grow h-px bg-white/10"></div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+                            {categories.filter(c => !c.isSpecial).map((category) => (
+                                <CategoryCard
+                                    key={category._id}
+                                    category={category}
+                                    onSelect={handleCategorySelect}
+                                />
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
         </div>

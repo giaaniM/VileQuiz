@@ -5,13 +5,13 @@ const dotenv = require('dotenv');
 // Base64 encoded to bypass GitHub Secret Scanning
 // --- ZERO CONFIG SETUP (Inject API Key First) ---
 // Base64 encoded to bypass GitHub Secret Scanning
-if (!process.env.GROQ_API_KEY) {
-    // Corrected Base64 parts for key starting with gsk_OH...
-    const P1 = 'Z3NrX09IN2Fta0U1MXNncTYwYXk1djNTV0dkeWIzRlk=';
-    const P2 = 'NDFJRUJKTFFmV2FXNkxMQjhEVld0Q2NG';
-    process.env.GROQ_API_KEY = Buffer.from(P1, 'base64').toString('utf-8') + Buffer.from(P2, 'base64').toString('utf-8');
-    console.log('🔑 Zero-Config: API Key injected successfully for Render.');
-}
+// if (!process.env.GROQ_API_KEY) {
+//     // Corrected Base64 parts for key starting with gsk_OH...
+//     const P1 = 'Z3NrX09IN2Fta0U1MXNncTYwYXk1djNTV0dkeWIzRlk=';
+//     const P2 = 'NDFJRUJKTFFmV2FXNkxMQjhEVld0Q2NG';
+//     process.env.GROQ_API_KEY = Buffer.from(P1, 'base64').toString('utf-8') + Buffer.from(P2, 'base64').toString('utf-8');
+//     console.log('🔑 Zero-Config: API Key injected successfully for Render.');
+// }
 
 // Load env vars
 dotenv.config();

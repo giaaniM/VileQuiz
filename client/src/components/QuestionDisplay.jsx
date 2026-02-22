@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import AudioManager from '../services/AudioManager';
 
 function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionIndex }) {
     const [timeLeft, setTimeLeft] = useState(timeLimit);
@@ -7,11 +8,22 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
     useEffect(() => {
         setTimeLeft(timeLimit);
         const timer = setInterval(() => {
-            setTimeLeft((prev) => Math.max(0, prev - 1));
+            setTimeLeft((prev) => {
+                const next = Math.max(0, prev - 1);
+
+                if (prev === 1 && next === 0) {
+                    // Play gong/buzzer when time reaches 0
+                    AudioManager.playSFX('timer_end');
+                    AudioManager.stopBGM(); // Stop music when time runs out
+                }
+
+                return next;
+            });
         }, 1000);
 
         return () => clearInterval(timer);
     }, [question, timeLimit]);
+
 
     const progressPercentage = (timeLeft / timeLimit) * 100;
 
@@ -64,9 +76,9 @@ function QuestionDisplay({ question, timeLimit, totalQuestions, currentQuestionI
                     )}
                     <h2 className={`
                         font-black text-white leading-tight font-nunito drop-shadow-md
-                        ${question.text.length > 140 ? 'text-lg md:text-2xl' :
-                            question.text.length > 80 ? 'text-xl md:text-3xl' :
-                                'text-2xl md:text-4xl lg:text-5xl'}
+                        ${question.text.length > 140 ? 'text-xl md:text-3xl' :
+                            question.text.length > 80 ? 'text-2xl md:text-4xl lg:text-5xl' :
+                                'text-3xl md:text-5xl lg:text-6xl md:max-w-4xl max-w-2xl px-2'}
                     `}>
                         {question.text}
                     </h2>

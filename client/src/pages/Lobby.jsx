@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
 import PlayerCard from '../components/PlayerCard';
+import AudioManager from '../services/AudioManager';
 
 function Lobby() {
     const location = useLocation();
@@ -31,7 +32,13 @@ function Lobby() {
         const socketUrl = '/'; // Relative path for socket.io
         const newSocket = io(socketUrl);
         setSocket(newSocket);
-        return () => { newSocket.disconnect(); };
+
+        // Lobby should be silent to build anticipation (or wait for game start)
+        // AudioManager.playBGM('bgm_lobby'); 
+
+        return () => {
+            newSocket.disconnect();
+        };
     }, []);
 
     useEffect(() => {
@@ -53,6 +60,7 @@ function Lobby() {
 
         socket.on('player-joined', (data) => {
             setPlayers(prev => [...prev, data.player]);
+            AudioManager.playSFX('player_joined');
         });
 
         socket.on('player-updated', (data) => {

@@ -59,8 +59,18 @@ class QuestionGenerator {
             const aiQuestions = await GroqService.generateQuestions(category, count);
 
             if (aiQuestions && Array.isArray(aiQuestions) && aiQuestions.length > 0) {
-                console.log(`✅ ${aiQuestions.length} domande generate con successo da Groq!`);
-                return this.formatQuestions(aiQuestions, category);
+                let finalQuestions = aiQuestions;
+                if (finalQuestions.length < count) {
+                    console.warn(`⚠️ Solo ${finalQuestions.length}/${count} domande generate. Riempio con fallback...`);
+                    const fallbackNeeded = count - finalQuestions.length;
+                    const fallback = this.fallbackQuestions.slice(0, fallbackNeeded);
+                    // Add isFallback flag to track them
+                    const fallbackWithFlag = fallback.map(q => ({ ...q, isFallback: true }));
+                    finalQuestions = [...finalQuestions, ...fallbackWithFlag];
+                }
+
+                console.log(`✅ ${finalQuestions.length} domande generate (incl. fallback)`);
+                return this.formatQuestions(finalQuestions, category);
             }
         } catch (error) {
             console.error('❌ Errore QuestionGenerator:', error.message);
@@ -94,8 +104,18 @@ class QuestionGenerator {
             const aiQuestions = await GroqService.generateMixedQuestions(selectedCategories);
 
             if (aiQuestions && Array.isArray(aiQuestions) && aiQuestions.length > 0) {
-                console.log(`✅ ${aiQuestions.length} domande miste generate con successo!`);
-                return this.formatQuestions(aiQuestions);
+                let finalQuestions = aiQuestions;
+                if (finalQuestions.length < count) {
+                    console.warn(`⚠️ Solo ${finalQuestions.length}/${count} domande miste generate. Riempio con fallback...`);
+                    const fallbackNeeded = count - finalQuestions.length;
+                    const fallback = this.fallbackQuestions.slice(0, fallbackNeeded);
+                    // Add isFallback flag and generic category
+                    const fallbackWithFlag = fallback.map(q => ({ ...q, category: 'Mista (Fallback)', isFallback: true }));
+                    finalQuestions = [...finalQuestions, ...fallbackWithFlag];
+                }
+
+                console.log(`✅ ${finalQuestions.length} domande miste (incl. fallback) generate!`);
+                return this.formatQuestions(finalQuestions);
             }
         } catch (error) {
             console.error('❌ Errore getMixedQuestions:', error.message);
@@ -112,6 +132,15 @@ class QuestionGenerator {
                 }
             } catch (e) {
                 console.error(`❌ Fallback fallito per ${cat}:`, e.message);
+            }
+        }
+
+        if (questions.length < selectedCategories.length) {
+            console.warn(`⚠️ Solo ${questions.length}/${selectedCategories.length} categorie coperte. Riempio con fallback...`);
+            const fallbackNeeded = selectedCategories.length - questions.length;
+            const fallback = this.fallbackQuestions.slice(0, fallbackNeeded);
+            for (const fb of fallback) {
+                questions.push({ ...fb, category: 'Mista (Fallback)', isFallback: true });
             }
         }
 

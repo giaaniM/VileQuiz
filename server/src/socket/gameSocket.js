@@ -273,8 +273,9 @@ const runGameLoop = async (io, pin) => {
             const categoryData = currentQ.category ? categories.find(c => c.name === currentQ.category) : null;
             const categoryImage = categoryData ? categoryData.icon_url : null;
 
-            // Category reveal for mixed mode (3 second animation before question)
-            if (gameState.mode === 'mixed' && currentQ.category) {
+            // Category reveal for ALL modes (3 second animation before question)
+            // This displays the category splash screen with the intro sound
+            if (currentQ.category) {
                 io.to(room).emit('category-reveal', {
                     category: currentQ.category,
                     categoryImage, // Send image URL

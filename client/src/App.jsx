@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import AudioManager from './services/AudioManager';
 import './index.css';
 import CategorySelection from './pages/CategorySelection';
 import Lobby from './pages/Lobby';
@@ -63,6 +65,30 @@ function Home() {
 }
 
 function App() {
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Check if the clicked element or any of its parents is interactive
+      const isClickable = e.target.closest(
+        'button, a, input, select, textarea, [role="button"], .cursor-pointer'
+      );
+
+      // Also check computed style for cursor: pointer as a fallback
+      const hasPointerCursor = window.getComputedStyle(e.target).cursor === 'pointer';
+
+      if (isClickable || hasPointerCursor) {
+        AudioManager.playSFX('general_click');
+      }
+    };
+
+    // Add listener to the window/document
+    window.addEventListener('click', handleGlobalClick);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('click', handleGlobalClick);
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <ScaledContainer referenceHeight={768}>

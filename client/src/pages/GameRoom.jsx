@@ -35,6 +35,12 @@ function GameRoom() {
     };
 
     useEffect(() => {
+        if (typeof countdown === 'number') {
+            AudioManager.playSFX('click');
+        }
+    }, [countdown]);
+
+    useEffect(() => {
         const newSocket = io(SOCKET_URL);
         setSocket(newSocket);
         socketRef.current = newSocket;
@@ -50,12 +56,14 @@ function GameRoom() {
         newSocket.on('game-countdown', (data) => {
             setStatus('countdown');
             setCountdown(data.value);
+            // Sound is now handled by a useEffect on 'countdown' state for better sync
         });
 
         // Category reveal for mixed mode
         newSocket.on('category-reveal', (data) => {
             setStatus('category-reveal');
             setCategoryReveal(data);
+            AudioManager.playSFX('category_intro');
         });
 
         newSocket.on('new-question', (questionData) => {
@@ -63,12 +71,14 @@ function GameRoom() {
             setCurrentQuestion(questionData);
             setResults(null);
             setCategoryReveal(null);
+            AudioManager.playGameLoop(questionData.questionIndex - 1);
         });
 
         newSocket.on('question-results', (resultData) => {
             setStatus('results');
             setResults(resultData);
-            AudioManager.playSFX('tick');
+            AudioManager.playSFX('correct'); // General success sound
+            AudioManager.stopBGM(); // Ensure music stops if everyone answered early
         });
 
         newSocket.on('calculating-leaderboard', (data) => {
@@ -83,18 +93,18 @@ function GameRoom() {
         newSocket.on('game-leaderboard', (data) => {
             setStatus('leaderboard');
             setLeaderboard(data.leaderboard);
-            AudioManager.playSFX('tick');
+            AudioManager.playSFX('leaderboard');
         });
 
         newSocket.on('game-over', (data) => {
             setStatus('finished');
             setLeaderboard(data.leaderboard);
-            AudioManager.playSFX('gameover');
+            AudioManager.playSFX('final_leaderboard');
             AudioManager.stopBGM();
         });
 
         newSocket.on('player-answered', (data) => {
-            // Sound or visual feedback
+            AudioManager.playSFX('join');
         });
 
         return () => {

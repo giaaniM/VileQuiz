@@ -71,6 +71,9 @@ function PlayerController() {
         newSocket.on('game-countdown', (data) => {
             setStatus('countdown');
             setCountdown(data.value);
+            if (typeof data.value === 'number') {
+                // AudioManager.playSFX('tick'); // Removed as per request
+            }
         });
 
         // Category reveal for mixed mode
@@ -106,16 +109,26 @@ function PlayerController() {
             setLastResult({ isCorrect: data.isCorrect, score: data.score });
             setScore(data.totalScore);
             setShowScorePop(true);
+
+            // Play correct/wrong sound
+            if (data.isCorrect) {
+                AudioManager.playSFX('correct');
+            } else {
+                AudioManager.playSFX('wrong');
+            }
+
             // Hide pop after 3s
             setTimeout(() => setShowScorePop(false), 3000);
         });
 
         newSocket.on('game-leaderboard', () => {
             setStatus('leaderboard');
+            AudioManager.playSFX('leaderboard');
         });
 
         newSocket.on('game-over', () => {
             setStatus('finished');
+            AudioManager.playSFX('gameover');
         });
 
         return () => newSocket.close();
@@ -124,7 +137,7 @@ function PlayerController() {
     const handleAnswer = (index) => {
         if (status !== 'answering') return;
 
-        AudioManager.playSFX('tick');
+        AudioManager.playSFX('mobile_click');
         setSelectedAnswer(index);
         socket.emit('submit-answer', { pin, answerIndex: index });
         setStatus('answered');
